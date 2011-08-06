@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+project="${extension_args[0]:-$1}"
+
+# TODO: edit option to open server config in editor.
+
+if variable_is_nonempty project
+then
+  if template_exists "server.conf"
+  then
+    ensure_paths_exist "${service_config_path}/servers"
+
+    # If this is running as root, ensure that Nginx can read from the
+    # application directory.
+    if user_is_root && path_exists "/home/${project}"
+    then
+      chmod_paths --recursive 'g+rx' "/home/${project}"
+    fi
+
+    project_config="${service_config_path}/servers/${project}.conf"
+
+    if (( force_flag == 1 )) && file_exists "${project_config}"
+    then
+      remove_file "${project_config}"
+    fi
+
+    if file_is_missing "${project_config}"
+    then
+      install_template "nginx/server.conf" to "${project_config}"
+
+      seed_template "${active_path}/etc/nginx/nginx.conf" \
+        modules_path "${modules_path}" \
+        service "${service}" \
+        project "${project}" \
+        project_path "${project_path:="/home/${project}"}" \
+        service_user "${service_user}" \
+        service_config_path "${service_config_path}" \
+        service_pid_file "${service_pid_file}" \
+        service_log_path "${service_log_path}"
+
+    else
+      warn "Not installing template ${project_config}"\
+        "as the file already exists"
+    fi
+  else
+    fail "ERROR: $extension_templates_path/server.conf template is missing."
+  fi
+else
+  fail "project must be specified for 'nginx server'"
+fi
+

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+mongrel2_configure()
+{
+  true
+}
+
+mongrel2_build()
+{
+  OPTFLAGS="-I${active_path}/include -L${active_path}/lib" \
+    PREFIX="${install_path}" make > make.log 2>&1
+}
+
+mongrel2_install()
+{
+
+  OPTFLAGS="-I${active_path}/include -L${active_path}/lib" \
+    PREFIX="${install_path}" make install > make.install.log 2>&1
+}
+
+

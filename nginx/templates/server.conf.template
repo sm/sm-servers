@@ -1,0 +1,50 @@
+upstream {{project}} {
+  server unix:{{project_path}}/shared/{{project}}.sock fail_timeout=0;
+}
+
+server {
+  listen 80;
+  client_max_body_size 50M;
+
+  server_name {{project}}.com *.{{project}}.com;
+
+  root {{project_path}}/current/public;
+
+  access_log {{project_path}}/shared/log/{{project}}.com.access.log;
+  error_log  {{project_path}}/shared/log/{{project}}.com.error.log  info;
+
+  # This is a ruby/python/etc... application, deny other types.
+  location ~ \.(php|asp|aspx|jsp|cfm|dll)$ {
+    deny all;
+    break;
+  }
+
+  location ~* ^.+\.(js|css|png|jpg|jpeg|gif|ico)$ {
+    expires max;
+  }
+
+  location /nginx/health {
+    # access_log /var/log/nginx/health.log;
+    access_log off;
+    index index.html;
+    auth_basic off;
+    root /etc/nginx/health;
+    rewrite  ^/nginx/health$ /index.html break;
+    return 200;
+  }
+
+  location / {
+    include {{service_config_path}}/conf/proxy.conf;
+    try_files /system/maintenance.html $uri $uri/index.html $uri.html @{{project}};
+  }
+
+  location @{{project}} {
+    include {{service_config_path}}/conf/proxy.conf;
+    proxy_pass http://{{project}};
+  }
+
+  error_page   500 502 503 504  /500.html;
+  location = /500.html {
+    root   {{project_path}}/current/public;
+  }
+}

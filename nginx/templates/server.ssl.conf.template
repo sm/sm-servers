@@ -1,0 +1,53 @@
+server {
+  listen 443 default;
+
+  server_name {{project}}.com *.{{project}}.com;
+
+  client_max_body_size 50M;
+  root /home/{{project}}/current/public;
+
+  access_log /home/{{project}}/shared/log/{{project}}.org.access.log;
+  error_log  /home/{{project}}/shared/log/{{project}}.org.error.log  info;
+
+  ssl                  on;
+  ssl_certificate      /etc/nginx/ssl/{{project}}.org.crt;
+  ssl_certificate_key  /etc/nginx/ssl/{{project}}.org.key;
+  ssl_session_timeout  5m;
+  ssl_protocols        SSLv3 TLSv1;
+  ssl_ciphers          +HIGH:+MEDIUM:!SSLv2:!ADH:!EXPORT56:!LOW;
+  ssl_prefer_server_ciphers   on;
+
+  location /nginx/health/ {
+    access_log /var/log/nginx/health.log;
+    index index.html;
+    auth_basic off;
+    root /etc/nginx;
+    break;
+  }
+
+  # This is a ruby/python/etc... application, deny other types.
+  location ~* ^.+\.(php|asp|aspx|jsp|cfm|dll)$ {
+    deny all;
+    break;
+  }
+
+  location ~* ^.+\.(js|css|png|jpg|jpeg|gif|ico)$ {
+    expires max;
+  }
+
+  location / {
+    include /etc/nginx/conf/proxy.conf;
+    try_files /system/maintenance.html $uri $uri/index.html $uri.html @{{project}};
+  }
+
+  location @{{project}} {
+    include /etc/nginx/conf/proxy.conf;
+    proxy_pass http://{{project}};
+  }
+
+  error_page   500 502 503 504  /500.html;
+  location = /500.html {
+    root   /home/{{project}}/current/public;
+  }
+}
+

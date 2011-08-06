@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+nginx_install_dependencies() {
+warn "${action} is untested / unused thus far."
+
+if os_is_linux
+then
+  if command_exists pacman
+  then
+    pacman -S --noconfirm patch curl zlib pcre openssl make base-devel
+
+  elif command_exists apt-get
+  then
+    apt-get install build-essential openssl curl zlib1g zlib1g-dev libssl-dev pcre pcre-dev
+
+  elif command_exists yum
+  then
+    yum install -y gcc-c++ patch zlib zlib-devel openssl openssl-devel pcre pcre-devel
+
+  elif command_exists emerge
+  then
+    log "TODO: Tell wayne how to install pcre, openssl and zlib dev headers on gentoo."
+
+  else
+    log "TODO: Install zlib openssl pcre via curl, complile install."
+
+  fi
+elif os_is_darwin
+then
+  release="( $(sw_vers -productName) )"
+
+  log "
+  Notes for ${system} $release
+  For Snow Leopard be sure to have Xcode Tools Version 3.2.1 (1613) or later
+    You should download the latest Xcode tools from developer.apple.com.
+    (This is since the dvd install for Snow Leopard contained bugs).
+    "
+fi
+echo
+}
+

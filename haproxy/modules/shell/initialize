@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+package_dependencies=( pcre )
+
+package_definition \
+  base_url "http://haproxy.1wt.eu/download/${package_version%.*}/src/" \
+  docs_url "http://haproxy.1wt.eu/download/${package_version%.*}/doc/configuration.txt"
+
+service_flags+=( -f "/etc/haproxy/haproxy.cfg" )
+service_start_flags+=( -p "${service_pid_file}" -D )
+service_restart_flags+=( -p "${service_pid_file}" )
+service_stop_flags+=( )
+
+service_run_as_root_flag=1
+

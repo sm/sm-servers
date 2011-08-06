@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
+
+service_flags=( -c "${service_config_path}/nginx.conf" )
+service_binary="${active_path}/sbin/nginx"
+
+if user_is_root
+then
+  service_run_as_root_flag=1
+fi
+

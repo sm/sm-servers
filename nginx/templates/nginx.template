@@ -1,0 +1,215 @@
+#!/usr/bin/env bash
+# chkconfig: 345 85 15
+# description: Manages the nginx webserver
+# processname: nginx
+
+# Author: Wayne E. Seguin
+#         wayneeseguin@gmail.com
+#
+# Nginx control file.
+#
+#   May be either in the $PATH as nginx_ctl
+#   or used as /etc/init.d/nginx
+#
+
+log()  { printf "$*\n" ; return $? ;  }
+succeed() { log "$*" ; exit 0 ; }
+fail() { log "ERROR: $*" ; exit 1 ; }
+
+usage() {
+  log "
+  Usage:
+
+    $0 start stop restart reload log shutdown check help [options]
+
+  Options:
+
+    --confd - Path to conf.d file, optional
+    --path  - Path to configuration files
+    --conf  - Path to nginx.conf
+    --pid   - Path to nginx pidfile
+    --log   - Path to nginx logs
+    --bin   - Path to nginx binary
+    --lock  - Path to nginx startup lock file
+
+  Description:
+
+    start    - Start Nginx
+    stop     - Stop Nginx
+    restart  - Restart Nginx
+    reload   - Reload Nginx configuration files in running nginx
+    log      - Reopen log files in running nginx
+    shutdown - Gracefully shut down workers
+    check    - Check Nginx configuration for errors
+    help     - Display this usage information
+"
+}
+
+parse_args()
+{
+  while [[ $# -gt 0 ]] ; do
+    token="$1" ; shift
+    case $token in
+      start|stop|restart|reload|log|shutdown|check|status|help)
+        action=$token
+        ;;
+      --confd) nginx_confd="$1"     ; shift ;;
+      --path)  nginx_path="$1"      ; shift ;;
+      --conf)  nginx_conf="$1"      ; shift ;;
+      --pid)   nginx_pid="$1"       ; shift ;;
+      --log)   nginx_log_path="$1"  ; shift ;;
+      --bin)   nginx="$1"           ; shift ;;
+      --lock)  nginx_lock="$1"      ; shift ;;
+      *)       action="error" ;;
+    esac
+  done
+}
+
+initialize()
+{
+  nginx_confd="${nginx_confd:-"/etc/conf.d/nginx"}"
+
+  if [[ -s "$nginx_confd" ]] ; then
+    source "$nginx_confd"
+  fi
+
+  nginx_lock="${nginx_lock:-/var/lock/nginx}"
+  if [[ -z "${nginx:-""}" ]] ; then
+    nginx="$(command -v nginx)"
+  fi
+  nginx="${nginx:-/sbin/nginx}"
+  nginx_path="${nginx_path:-/etc/nginx}"
+  nginx_conf="${nginx_conf:-"$nginx_path/nginx.conf"}"
+  nginx_pid="${nginx_pid:-/var/run/nginx.pid}"
+  nginx_log_path="${nginx_log_path:-/var/log/nginx}"
+
+  declare -i master_pid
+
+  if [[ -f "$nginx_pid" ]] ;then
+    master_pid=$(cat "$nginx_pid")
+  else
+    master_pid=0
+  fi
+}
+
+nginx_start()
+{
+  if [[ ${master_pid:-0} -gt 0 ]] ; then
+    log "It appears that Nginx ($master_pid) is already running\n(from pidfile: $nginx_pid)"
+  else
+    # TODO: Pass through the --pid and --log here.
+    $nginx -c "$nginx_conf"
+    result=$?
+    if [[ $result -eq 0 ]] ; then
+      touch $nginx_lock
+    else
+      fail "Could not start Nginx server using config file ${nginx_conf}"
+    fi
+  fi
+}
+
+nginx_stop()
+{
+  if [[ ${master_pid:-0} -gt 0 ]] ; then
+    kill -QUIT $master_pid
+    result=$?
+    if [[ $retval -eq 0 ]] ; then
+      rm -f $nginx_lock
+    fi
+  else
+    log "It appears that Nginx is already not running\n(from pidfile: $nginx_pid)"
+  fi
+}
+
+nginx_restart()
+{
+  if [[ ${master_pid:-0} -gt 0 ]] ; then
+    log "Hot upgrading Nginx ($master_pid) running binary."
+    kill -USR2 $master_pid
+  else
+    log "It appears that Nginx is not running.\n  (using pidfile: $nginx_pid)\nStarting Nginx."
+    nginx_start
+  fi
+}
+
+nginx_reload()
+{
+  if [[ ${master_pid:-0} -gt 0 ]] ; then
+    printf "Reloading Nginx ($master_pid) configuration."
+    kill -HUP $master_pid
+  else
+    printf "It appears that Nginx is not running.\n(from pidfile: $nginx_pid)\nStarting Nginx.\n"
+    nginx_start
+  fi
+}
+
+nginx_log()
+{
+  if [[ ${master_pid:-0} -gt 0 ]] ; then
+    printf "Re-opening Nginx ($master_pid) logs."
+    kill -USR1 $master_pid
+  else
+    printf "It appears that Nginx is already not running\n(from pidfile: $nginx_pid)\nStarting Nginx.\n"
+    start
+  fi
+}
+
+nginx_shutdown()
+{
+  if [[ ${master_pid:-0} -gt 0 ]] ; then
+    printf "Gracefully shutting down Nginx ($master_pid) workers.\n  (workers will finish current request first)\n"
+    kill -WINCH $master_pid
+  else
+    printf "It appears that Nginx is not running.\n(from pidfile: $nginx_pid)\nStarting Nginx.\n"
+  fi
+}
+
+nginx_check()
+{
+  if nginx -t -c "$nginx_conf" ; then
+    succeed "$nginx_conf syntax is OK"
+  else
+    fail "$nginx_conf syntax is NOT OK"
+  fi
+}
+
+nginx_status()
+{
+  log "
+Nginx:
+  version: $("${nginx}" -V | head -1 | awk -F'\/' '{print $2}')"
+
+  if [[ -s "${nginx_pid}" ]] ; then
+    log "  status: running"
+    log "  pid: $(cat ${nginx_pid})"
+  else
+    log "  status: not running."
+  fi
+
+  log "  pidfile: ${nginx_pid}
+  error_log: $(awk '/^error_log/{print $2}' ${nginx_conf})
+  access_log: $(awk '/^access_log/{print $2}' ${nginx_conf})
+  dbfile: $(awk '/^dbfilename/{print $2}' ${nginx_conf})
+"
+}
+
+action="${1:-""}"
+
+parse_args
+
+initialize
+
+case "$action" in
+  start)    nginx_start    ;;
+  stop)     nginx_stop     ;;
+  restart)  nginx_restart  ;;
+  reload)   nginx_reload   ;;
+  check)    nginx_check    ;;
+  status)   nginx_status   ;;
+  log)      nginx_log      ;;
+  shutdown) nginx_shutdown ;;
+  help)     usage    ;;
+  *)        usage ; exit 1 ;;
+esac
+
+exit $?

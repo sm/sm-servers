@@ -1,0 +1,3 @@
+version=2.1.5
+base_url=http://repo.varnish-cache.org/source
+archive_format=tar.gz

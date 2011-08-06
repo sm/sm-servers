@@ -1,0 +1,3 @@
+version=1.7.5
+base_url=http://mongrel2.org/static/downloads
+archive_format=tar.bz2

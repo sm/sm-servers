@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+description "Extension for managing Nginx (${website_url})."
+
+action "list" "List enabled servers."
+action "new  <project name>" "Add and enable a new project server config."
+action "enable  <project name>" "Enable a project server config."
+action "disable <project name>" "Disable a project server config."
+action "edit <project name>" "Edit the server config for the specified project in EDITOR or vi.."
+
+show_help usage

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# Enable a project (project)
+# This moves /etc/nginx/projects/X.conf.disabled to X.conf
+true ${project:="${extension_args[0]:-$1}"}
+
+if variable_is_nonempty project
+then
+  if file_exists "${service_config_path}/servers/$project.conf.disbled"
+  then
+    move_file "${service_config_path}/servers/$project.conf.disbled" \
+      to "${service_config_path}/servers/$project.conf"
+  else
+    if file_exists "${service_config_path}/servers/$project.conf"
+    then
+      succeed "$project.conf is already enabled."
+    else
+      fail "Cannot disable, $project.conf"\
+        "as ${service_config_path}/servers/$project.conf.disabled does not exist."
+    fi
+  fi
+else
+  fail "project must be specified for 'nginx project'"
+fi

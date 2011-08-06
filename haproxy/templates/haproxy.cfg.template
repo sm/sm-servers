@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+# HAProxy Configuration File
+global
+  # uid 69
+  # gid 69
+  # debug
+  daemon
+  stats socket /var/run/haproxy/haproxy.stat mode 0600
+  log 127.0.0.1 local4
+  maxconn 15000
+  ulimit-n 80013
+  pidfile /var/run/haproxy/haproxy.pid
+  spread-checks 5
+
+defaults
+  log global
+  mode http
+  contimeout 4000
+  clitimeout 4200
+  srvtimeout 4300
+  balance roundrobin
+
+  option httplog
+  option abortonclose
+  option httpclose
+  # Set X-Forwarded-For header.
+  option forwardfor
+  retries 3
+  option redispatch
+  http-check siable-on-404
+
+  stats enable
+  stats uri /haproxy?stats
+  stats realm Haproxy\ Statistics
+  stats auth {{service_user}}:{{service_user}}
+
+  monitor-uri /haproxy/monitor
+  timeout check 2000
+
+listen http_apps 127.0.0.1:80
+  mode http
+
+  # This line can be important for tproxy, if not using tproxy then don't worry
+  # 0.0.0.0 can/should be replaced by the HAProxy IP Address
+  # source 0.0.0.0 usesrc clientip
+
+  # Can insert cookies with serverid if required,
+  #cookie SERVERID insert nocache indirect
+
+  # Servers block
+  server web-1 127.0.0.1:5000 check inter 5000 fastinter 1000 fall 1 weight 1 cookie web-1 minconn 3 maxconn 10
+  server web-2 227.0.0.1:5001 check inter 5000 fastinter 1000 fall 1 weight 2 cookie web-2 minconn 3 maxconn 10
+  server web-3 227.0.0.1:5002 check inter 5000 fastinter 1000 fall 1 weight 3 cookie web-3 minconn 3 maxconn 10
+  # NOTE: Adjust the {min,max}conn to whatever backend you are running.
+
+  # Fallback server, in case the servers block is not responding.
+  server fallback 127.0.0.1:80 backup source 0.0.0.0
+
+# NOTE: The configuration below is yet untested
+#listen https_apps 127.0.0.1:443
+#  mode tcp
+#
+#  # This line is important for tproxy, if not using tproxy then remove this line
+#  # 0.0.0.0 can/should be replaced by the HAProxy IP Address
+#  source 0.0.0.0 usesrc clientip
+#
+#  # Servers block
+#  server web-1 127.0.0.1:5000 check inter 5000 fastinter 1000 fall 1 weight 1 cookie web-1 minconn 3 maxconn 10
+#  server web-2 227.0.0.1:5000 check inter 5000 fastinter 1000 fall 1 weight 2 cookie web-2 minconn 3 maxconn 10
+#  server web-3 227.0.0.1:5000 check inter 5000 fastinter 1000 fall 1 weight 3 cookie web-3 minconn 3 maxconn 10
+#
+#  # Fallback server, in case the servers block is not responding.
+#  server fallback 127.0.0.1:80 backup source 0.0.0.0
+#
+#  option redispatch
+#

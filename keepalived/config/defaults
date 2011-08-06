@@ -1,0 +1,4 @@
+version=1.2.2
+base_url=http://www.keepalived.org/software/
+archive_format=tar.gz
+website=http://www.keepalived.org/software/

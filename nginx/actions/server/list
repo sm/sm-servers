@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+find "${service_config_path}/servers" -type f -iname '*.conf' |
+  awk -F'/' '/.conf$/{print $NF}'
