@@ -6,7 +6,7 @@ project="${extension_args[0]:-$1}"
 
 if variable_is_nonempty project
 then
-  if template_exists "server.conf"
+  if template_exists "nginx/server.conf"
   then
     ensure_paths_exist "${service_config_path}/servers"
 
