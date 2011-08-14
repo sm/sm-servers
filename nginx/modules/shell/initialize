@@ -20,6 +20,12 @@ configure_flags=(
 # --with-imap
 # --with-imap_ssl_module
 
+if os_is_linux
+then
+  ldconfig -p | grep -s libssl ||
+    error "OpenSSL with development headers is required to compile the Nginx package."
+fi
+
 for library in zlib pcre # openssl
 do
   if package_is_active "$library"
