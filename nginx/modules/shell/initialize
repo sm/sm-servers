@@ -20,7 +20,7 @@ configure_flags=(
 # --with-imap
 # --with-imap_ssl_module
 
-for library in zlib pcre openssl # zlib openssl pcre
+for library in zlib pcre # openssl
 do
   if package_is_active "$library"
   then
