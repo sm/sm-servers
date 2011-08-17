@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-if (( force_flag <= 0 )) && path_exists "/etc/nginx"
-then
+(( force_flag )) || ! path_exists "/etc/nginx" ||
   error "/etc/nginx already exists, in order to re-configure pass the --force flag"
-else
-  ensure_paths_exist "/etc/nginx"
-  cp -Rf ${install_path}/etc/nginx/* "/etc/nginx/"
-fi
+
+ensure_paths_exist "/etc/nginx"
+
+cp -Rf "${install_path}"/etc/nginx/* "/etc/nginx/"
+
