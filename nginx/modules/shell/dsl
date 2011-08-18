@@ -50,43 +50,38 @@ nginx_initialize()
   user_is_not_root || service_run_as_root_flag=1
 }
 
-nginx_install_dependencies() {
-warn "${action} is untested / unused thus far."
+nginx_install_dependencies()
+{
+  warn "${action} is untested / unused thus far."
 
-if os_is_linux
-then
-  if command_exists pacman
+  if os_is_linux
   then
-    pacman -S --noconfirm patch curl zlib pcre openssl make base-devel
+    if command_exists pacman
+    then
+      pacman -S --noconfirm patch curl zlib pcre openssl make base-devel
 
-  elif command_exists apt-get
+    elif command_exists apt-get
+    then
+      apt-get install build-essential openssl curl zlib1g zlib1g-dev libssl-dev pcre pcre-dev
+
+    elif command_exists yum
+    then
+      yum install -y gcc-c++ patch zlib zlib-devel openssl openssl-devel pcre pcre-devel
+
+    elif command_exists emerge
+    then
+      log "TODO: Tell wayne how to install pcre, openssl and zlib dev headers on gentoo."
+
+    else
+      log "TODO: Install zlib openssl pcre via curl, complile install."
+
+    fi
+  elif os_is_darwin
   then
-    apt-get install build-essential openssl curl zlib1g zlib1g-dev libssl-dev pcre pcre-dev
-
-  elif command_exists yum
-  then
-    yum install -y gcc-c++ patch zlib zlib-devel openssl openssl-devel pcre pcre-devel
-
-  elif command_exists emerge
-  then
-    log "TODO: Tell wayne how to install pcre, openssl and zlib dev headers on gentoo."
-
-  else
-    log "TODO: Install zlib openssl pcre via curl, complile install."
-
+    release="( $(sw_vers -productName) )"
+    log "Notes for ${system} $release for OSX be sure to have the latest XCode tools. "
   fi
-elif os_is_darwin
-then
-  release="( $(sw_vers -productName) )"
-
-  log "
-  Notes for ${system} $release
-  For Snow Leopard be sure to have Xcode Tools Version 3.2.1 (1613) or later
-    You should download the latest Xcode tools from developer.apple.com.
-    (This is since the dvd install for Snow Leopard contained bugs).
-    "
-fi
-echo
+  echo
 }
 
 nginx_postinstall()
@@ -127,7 +122,6 @@ nginx_postactivate()
   link --force "${install_base_path}/active/sbin/nginx" \
     "${active_path}/sbin/nginx"
 }
-
 
 nginx_service_setup()
 {
