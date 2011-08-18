@@ -7,21 +7,17 @@
 #
 true ${project:="${extension_args[0]:-$1}"}
 
-if variable_is_nonempty project
-then
-  if file_exists "${service_config_path}/servers/$project.conf"
-  then
-    move_file "${service_config_path}/servers/$project.conf" \
-      to "${service_config_path}/servers/$project.conf.disabled"
-  else
-    if file_exists "${service_config_path}/servers/$project.conf.disabled"
-    then
-      succeed "$project.conf is already disabled."
-    else
-      fail "INFO: Cannot disable"\
-        "as ${service_config_path}/servers/$project.conf does not exist."
-    fi
-  fi
-else
+variable_is_nonempty project ||
   fail "project must be specified for 'nginx server'"
+
+if file_exists "${service_config_path}/servers/$project.conf"
+then
+  move_file "${service_config_path}/servers/$project.conf" \
+    to "${service_config_path}/servers/$project.conf.disabled"
+else
+  file_exists "${service_config_path}/servers/$project.conf.disabled" ||
+    fail "INFO: Cannot disable"\
+    "as ${service_config_path}/servers/$project.conf does not exist."
+
+  succeed "$project.conf is already disabled."
 fi
