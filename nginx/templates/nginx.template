@@ -69,27 +69,26 @@ initialize()
 {
   nginx_confd="${nginx_confd:-"/etc/conf.d/nginx"}"
 
-  if [[ -s "$nginx_confd" ]] ; then
+  if [[ -s "$nginx_confd" ]]
+  then
     source "$nginx_confd"
   fi
 
   nginx_lock="${nginx_lock:-/var/lock/nginx}"
-  if [[ -z "${nginx:-""}" ]] ; then
+
+  if command_exists nginx
+  then
     nginx="$(command -v nginx)"
   fi
-  nginx="${nginx:-/sbin/nginx}"
-  nginx_path="${nginx_path:-/etc/nginx}"
-  nginx_conf="${nginx_conf:-"$nginx_path/nginx.conf"}"
-  nginx_pid="${nginx_pid:-/var/run/nginx.pid}"
-  nginx_log_path="${nginx_log_path:-/var/log/nginx}"
+
+  true \
+      "${nginx:=/sbin/nginx}" \
+      "${nginx_path:=/etc/nginx}" \
+      "${nginx_conf:="$nginx_path/nginx.conf"}" \
+      "${nginx_pid:=/var/run/nginx.pid}" \
+      "${nginx_log_path:=/var/log/nginx}"
 
   declare -i master_pid
-
-  if [[ -f "$nginx_pid" ]] ;then
-    master_pid=$(cat "$nginx_pid")
-  else
-    master_pid=0
-  fi
 }
 
 nginx_start()

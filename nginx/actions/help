@@ -2,9 +2,10 @@
 
 description "Extension for managing Nginx (${website_url})."
 
-action "service [action]" "Control ${extension}Nginx service."
-action "server [action]" "Work with ${extension}Nginx server configurations."
-action "package [action]" "Use ${extension} package."
-action "[namespace] help" "Display help for namespaces ${extension} {service,server,package,conf}."
+action "service [action]"   "Control ${extension}Nginx service."
+action "server [action]"    "Work with ${extension}Nginx server configurations."
+action "package [action]"   "Use ${extension} package."
+action "configure root_etc" "Replace /etc/nginx with active install's configuration directory."
+action "[namespace] help"   "Display help for namespaces ${extension} {service,server,package,conf}."
 
 show_help usage
