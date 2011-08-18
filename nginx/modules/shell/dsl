@@ -45,7 +45,7 @@ nginx_initialize()
 
   master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
   service_flags=( -c "${service_config_path}/nginx.conf" )
-  service_binary="${active_path}/sbin/nginx"
+  service_binary="${install_path}/sbin/nginx"
 
   user_is_not_root || service_run_as_root_flag=1
 }
@@ -260,9 +260,9 @@ nginx_server_new()
   file_exists "${project_config}" ||
     install_template "nginx/server.conf" to "${project_config}"
 
-  if file_exists "${active_path}/etc/nginx/nginx.conf"
+  if file_exists "${install_path}/etc/nginx/nginx.conf"
   then
-    seed_template "${active_path}/etc/nginx/nginx.conf" \
+    seed_template "${install_path}/etc/nginx/nginx.conf" \
       modules_path "${modules_path}" \
       service "${service}" \
       project "${project}" \
