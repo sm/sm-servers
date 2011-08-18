@@ -115,7 +115,7 @@ nginx_postactivate()
 
   if ! file_exists "${service_config_path}/nginx.conf"
   then
-    link --force "${install_base_path}/active/etc/nginx" \
+    link --force "${install_path}/etc/nginx" \
       "${service_config_path}"
 
     enter "${service_config_path}"
@@ -124,7 +124,7 @@ nginx_postactivate()
     remove_files "${nginx_files[@]}"
   fi
 
-  link --force "${install_base_path}/active/sbin/nginx" \
+  link --force "${install_path}/sbin/nginx" \
     "${active_path}/sbin/nginx"
 
   service_setup # create user, etc... then calls nginx_service_setup
