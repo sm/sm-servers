@@ -233,6 +233,8 @@ nginx_server_conf_edit()
 
 nginx_server_new()
 {
+  nginx_initialize # This should have been called.......
+
   project="${extension_args[0]:-$1}"
 
   # TODO: edit option to open server config in editor.
@@ -260,8 +262,7 @@ nginx_server_new()
   file_exists "${project_config}" ||
     install_template "nginx/server.conf" to "${project_config}"
 
-  if file_exists "${install_path}/etc/nginx/nginx.conf"
-  then
+  ! file_exists "${install_path}/etc/nginx/nginx.conf" ||
     seed_template "${install_path}/etc/nginx/nginx.conf" \
       modules_path "${modules_path}" \
       service "${service}" \
@@ -271,5 +272,4 @@ nginx_server_new()
       service_config_path "${service_config_path}" \
       service_pid_file "${service_pid_file}" \
       service_log_path "${service_log_path}"
-  fi
 }
