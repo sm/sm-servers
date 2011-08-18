@@ -86,9 +86,12 @@ nginx_install_dependencies()
 
 nginx_postinstall()
 {
-  move_files --if-exists "nginx.conf" \
-    to "${install_path}/etc/nginx/conf/nginx.conf.default" \
-    from "${install_path}/etc/nginx"
+  if file_exists "nginx.conf"
+  then
+    move_file "nginx.conf" \
+      to "${install_path}/etc/nginx/conf/nginx.conf.default" \
+      from "${install_path}/etc/nginx"
+  fi
 
   enter "${install_path}"
   ensure_paths_exist "${nginx_dirs[@]}"
