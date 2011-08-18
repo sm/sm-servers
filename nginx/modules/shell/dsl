@@ -111,15 +111,13 @@ nginx_postactivate()
 {
   user_is_root || return 0
 
-  if (( ${force_flag:=0} == 1 ))
-  then
-    remove_paths "${service_config_path}"
-  fi
+  (( ${force_flag:=0} == 0 )) || remove_paths "${service_config_path}"
+
+  service_setup # create user, etc... then calls nginx_service_setup
 
   if ! file_exists "${service_config_path}/nginx.conf"
   then
-    link --force "${install_path}/etc/nginx" \
-      "${service_config_path}"
+    link force from "${install_path}/etc/nginx" to "${service_config_path}"
 
     enter "${service_config_path}"
 
@@ -127,10 +125,7 @@ nginx_postactivate()
     remove_files "${nginx_files[@]}"
   fi
 
-  link --force "${install_path}/sbin/nginx" \
-    "${active_path}/sbin/nginx"
-
-  service_setup # create user, etc... then calls nginx_service_setup
+  link force from "${install_path}/sbin/nginx" to "${active_path}/sbin/nginx"
 }
 
 nginx_service_setup()
