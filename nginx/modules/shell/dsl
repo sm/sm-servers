@@ -2,10 +2,7 @@
 
 nginx_initialize()
 {
-  package_initialize
-  service_initialize
-  # (( ${package_initialized:=0} )) || package_initialize
-  # (( ${service_initialized:=0} )) || service_initialize
+  service_initialize #TODO: Are you sure ?
 
   # TODO: Allow overriding of these parameters via cli
   # These defaults may be overridden also by the nginx configuration files.
