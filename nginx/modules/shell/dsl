@@ -121,8 +121,7 @@ nginx_postactivate()
 
     enter "${service_config_path}"
 
-    # TODO: add from parameter from remove_files
-    remove_files "${nginx_files[@]}"
+    remove_files "${nginx_files[@]}" # TODO: add from parameter to remove_files
   fi
 
   link force from "${install_path}/sbin/nginx" to "${active_path}/sbin/nginx"
