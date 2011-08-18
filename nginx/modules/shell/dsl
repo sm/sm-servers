@@ -132,7 +132,8 @@ nginx_postactivate()
 
 nginx_service_setup()
 {
-  install_template "nginx/nginx.conf" to "${install_path}/etc/nginx/nginx.conf" \
+  install_template "nginx/nginx.conf" \
+    to "${install_path}/etc/nginx/nginx.conf" \
     mode 0644 owner "${service_user}"
 
   seed_template "${install_path}/etc/nginx/nginx.conf" \
