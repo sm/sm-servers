@@ -125,6 +125,8 @@ nginx_postactivate()
 
 nginx_service_setup()
 {
+  service_setup # create user, etc...
+
   install_template "nginx/nginx.conf" to "${install_path}/etc/nginx/nginx.conf" \
     mode 0644 owner "${service_user}"
 
