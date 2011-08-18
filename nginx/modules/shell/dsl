@@ -230,3 +230,46 @@ nginx_server_conf_edit()
 
   ${EDITOR} "${service_config_path}/servers/${project:-"${extension_args[0]}"}.conf"
 }
+
+nginx_server_new()
+{
+  project="${extension_args[0]:-$1}"
+
+  # TODO: edit option to open server config in editor.
+  variable_is_nonempty project || fail "$FUNCNAME: project name must be given."
+
+  template_exists "nginx/server.conf" ||
+    fail "$FUNCNAME: $extension_templates_path/server.conf template is missing."
+
+  ensure_paths_exist "${service_config_path}/servers"
+
+  # If this is running as root, ensure that Nginx can read from the
+  # application directory.
+  if user_is_root && path_exists "/home/${project}"
+  then
+    chmod_paths --recursive 'g+rx' "/home/${project}"
+  fi
+
+  project_config="${service_config_path}/servers/${project}.conf"
+
+  if (( force_flag == 1 )) && file_exists "${project_config}"
+  then
+    remove_file "${project_config}"
+  fi
+
+  file_exists "${project_config}" ||
+    install_template "nginx/server.conf" to "${project_config}"
+
+  if file_exists "${active_path}/etc/nginx/nginx.conf"
+  then
+    seed_template "${active_path}/etc/nginx/nginx.conf" \
+      modules_path "${modules_path}" \
+      service "${service}" \
+      project "${project}" \
+      project_path "${project_path:="/home/${project}"}" \
+      service_user "${service_user}" \
+      service_config_path "${service_config_path}" \
+      service_pid_file "${service_pid_file}" \
+      service_log_path "${service_log_path}"
+  fi
+}
