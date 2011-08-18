@@ -233,14 +233,17 @@ nginx_server_conf_edit()
   ${EDITOR} "${service_config_path}/servers/${project:-"${extension_args[0]}"}.conf"
 }
 
-nginx_server_new()
+nginx_server_new_cli()
 {
-  nginx_initialize # This should have been called.......
-
-  project="${extension_args[0]:-$1}"
-
+  array_shift extension_args project
+  : ${project:=$1}
   # TODO: edit option to open server config in editor.
   variable_is_nonempty project || fail "$FUNCNAME: project name must be given."
+}
+
+nginx_server_new()
+{
+  #nginx_initialize # This should have been called.......
 
   template_exists "nginx/server.conf" ||
     fail "$FUNCNAME: $extension_templates_path/server.conf template is missing."
