@@ -5,7 +5,7 @@ nginx_cli()
   local _ignored_args=() _package_args=( $@ ) _token index \
     _count=${#_package_args[@]} _domain
 
-  domains=()
+  variable_is_nonempty domains || domains=()
 
   for (( index=0 ; index < $_count ; index++ ))
   do
