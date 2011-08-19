@@ -271,8 +271,8 @@ nginx_server_new()
   file_exists "${project_config}" ||
     install_template "nginx/server.conf" to "${project_config}"
 
-  ! file_exists "${install_path}/etc/nginx/nginx.conf" ||
-    seed_template "${install_path}/etc/nginx/nginx.conf" \
+  ! file_exists "${project_config}" ||
+    seed_template "${project_config}" \
       modules_path "${modules_path}" \
       service "${service}" \
       project "${project}" \
