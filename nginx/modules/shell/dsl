@@ -85,7 +85,7 @@ nginx_initialize()
   CFLAGS="-I${active_path}/include ${CFLAGS:-} "
 
   true ${edit_flag:=0}
-  array_is_nonempty domains || domains=("${project}.com" "*${project}.com")
+  array_is_nonempty domains || domains+=("${project}.com" "*${project}.com")
   master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
   service_flags=( -c "${service_config_path}/nginx.conf" )
   service_binary="${install_path}/sbin/nginx"
