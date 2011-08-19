@@ -19,8 +19,15 @@ nginx_cli()
           error "$FUNCNAME: a domain must follow keyword 'domain'"
         domains+=(${_domain})
         ;;
+      user)
+        project_user="${_package_args[$((++index))]}"
+        variable_is_nonempty project_user ||
+          error "$FUNCNAME: a project user name must follow keyword 'user'"
+        ;;
       project)
         project="${_package_args[$((++index))]}"
+        variable_is_nonempty project ||
+          error "$FUNCNAME: a project name must follow keyword 'project'"
         ;;
       edit)
         edit_flag=1
@@ -84,8 +91,12 @@ nginx_initialize()
   LDFLAGS="-L${active_path}/lib ${LDFLAGS:-}"
   CFLAGS="-I${active_path}/include ${CFLAGS:-} "
 
-  true ${edit_flag:=0}
-  array_is_nonempty domains || domains=("${project}.com" "*${project}.com")
+  true \
+    ${edit_flag:=0} \
+    ${project_user:=${project}} \
+    ${project_path:="/home/${project_user:-${project}}"} \
+    ${domains:=("${project}.com" "*${project}.com")}
+
   master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
   service_flags=( -c "${service_config_path}/nginx.conf" )
   service_binary="${install_path}/sbin/nginx"
@@ -312,8 +323,8 @@ nginx_server_new()
       service "${service}" \
       project "${project}" \
       domains "${domains[*]}" \
-      project_path "${project_path:="/home/${project}"}" \
-      service_user "${service_user}" \
+      project_path "${project_path}" \
+      project_user "${project_user}" \
       service_config_path "${service_config_path}" \
       service_pid_file "${service_pid_file}" \
       service_log_path "${service_log_path}"
