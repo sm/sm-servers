@@ -5,7 +5,7 @@ nginx_cli()
   local _ignored_args=() _package_args=( $@ ) _token index \
     _count=${#_package_args[@]} _domain
 
-  declare -a domains
+  domains=()
 
   for (( index=0 ; index < $_count ; index++ ))
   do
@@ -85,7 +85,7 @@ nginx_initialize()
   CFLAGS="-I${active_path}/include ${CFLAGS:-} "
 
   true ${edit_flag:=0}
-  array_is_nonempty domains || domains+=("${project}.com" "*${project}.com")
+  array_is_nonempty domains || domains=("${project}.com" "*${project}.com")
   master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
   service_flags=( -c "${service_config_path}/nginx.conf" )
   service_binary="${install_path}/sbin/nginx"
