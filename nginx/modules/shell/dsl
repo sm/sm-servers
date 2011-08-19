@@ -311,7 +311,7 @@ nginx_server_new()
       modules_path "${modules_path}" \
       service "${service}" \
       project "${project}" \
-      domain "${domain:-${project}}" \
+      domains "${domains[*]}" \
       project_path "${project_path:="/home/${project}"}" \
       service_user "${service_user}" \
       service_config_path "${service_config_path}" \
