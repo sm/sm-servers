@@ -1,2 +1,3 @@
 edit=nginx_server_conf_edit()
 new=nginx_server_new()
+add=nginx_server_new()

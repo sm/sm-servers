@@ -1,5 +1,34 @@
 #!/usr/bin/env bash
 
+nginx_cli()
+{
+  local _ignored_args=() _package_args=( $@ ) _token index \
+    _count=${#_package_args[@]} _domain
+
+  declare -a domains
+
+  for (( index=0 ; index < $_count ; index++ ))
+  do
+    _token="${_package_args[$index]}"
+
+    case "${_token}" in
+      domain)
+        _domain="${_package_args[$((++index))]}"
+        _domain="${_domain//,/ }"
+        variable_is_nonempty _domain ||
+          error "$FUNCNAME: a domain must follow keyword 'domain'"
+        domains+=(${_domain})
+        ;;
+      *)
+        _ignored_args+=("${_token}")
+        ;;
+    esac
+
+  done
+
+  nginx_initialize "${_ignored_args[@]}"
+}
+
 nginx_initialize()
 {
   if ! string_contains "{FUNCNAME[*]}" "extension_action_prerequisites"
@@ -49,6 +78,7 @@ nginx_initialize()
   LDFLAGS="-L${active_path}/lib ${LDFLAGS:-}"
   CFLAGS="-I${active_path}/include ${CFLAGS:-} "
 
+  array_is_nonempty domains || domains=("${project}.com" "*${project}.com")
   master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
   service_flags=( -c "${service_config_path}/nginx.conf" )
   service_binary="${install_path}/sbin/nginx"
@@ -276,6 +306,7 @@ nginx_server_new()
       modules_path "${modules_path}" \
       service "${service}" \
       project "${project}" \
+      domain "${domain:-${project}}" \
       project_path "${project_path:="/home/${project}"}" \
       service_user "${service_user}" \
       service_config_path "${service_config_path}" \
