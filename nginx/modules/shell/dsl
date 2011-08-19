@@ -2,7 +2,8 @@
 
 nginx_initialize()
 {
-  service_initialize #TODO: Are you sure ?
+  string_contains "{FUNCNAME[*]}" "package_cli"        || package_cli
+  string_contains "{FUNCNAME[*]}" "service_initialize" || service_initialize
 
   # TODO: Allow overriding of these parameters via cli
   # These defaults may be overridden also by the nginx configuration files.
