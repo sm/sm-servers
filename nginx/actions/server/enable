@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Enable a project (project)
 # This moves /etc/nginx/projects/X.conf.disabled to X.conf
