@@ -1,0 +1,12 @@
+conf/edit=conf/nginx_conf_edit()
+conf/help=conf/help
+configure/root_etc=configure/nginx_configure_root_etc()
+help=help
+server/add=server/nginx_server_new()
+server/disable=server/disable
+server/edit=server/nginx_server_conf_edit()
+server/enable=server/enable
+server/help=server/help
+server/list=server/list
+server/new=server/nginx_server_new()
+service/setup=service/nginx_service_setup()
