@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-service_run_as_root_flag=1
-

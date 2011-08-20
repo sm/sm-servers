@@ -1,8 +1,24 @@
-#!/usr/bin/env bash
+#!/bin/sh
+
+haproxy_initialize()
+{
+  package_dependencies=( pcre )
+
+  package_definition \
+    base_url "http://haproxy.1wt.eu/download/${package_version%.*}/src/" \
+    docs_url "http://haproxy.1wt.eu/download/${package_version%.*}/doc/configuration.txt"
+
+  service_flags+=( -f "/etc/haproxy/haproxy.cfg" )
+  service_start_flags+=( -p "${service_pid_file}" -D )
+  service_restart_flags+=( -p "${service_pid_file}" )
+  service_stop_flags+=( )
+
+  service_run_as_root_flag=1
+}
 
 haproxy_configure()
 {
-    # We build generic since the Makefile.osx doesn't appear to work
+  # We build generic since the Makefile.osx doesn't appear to work
     if os_is_darwin
     then
       copy_file --force "Makefile.osx" to "Makefile"

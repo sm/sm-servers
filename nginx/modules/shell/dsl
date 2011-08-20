@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 nginx_cli()
 {
@@ -108,7 +108,7 @@ nginx_initialize()
   user_is_not_root || service_run_as_root_flag=1
 }
 
-nginx_install_dependencies()
+nginx_os_dependencies_install()
 {
   warn "${action} is untested / unused thus far."
 
@@ -132,7 +132,6 @@ nginx_install_dependencies()
 
     else
       log "TODO: Install zlib openssl pcre via curl, complile install."
-
     fi
   elif os_is_darwin
   then
