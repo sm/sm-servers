@@ -10,3 +10,4 @@ server/help=server/help
 server/list=server/list
 server/new=server/nginx_server_new()
 service/setup=service/nginx_service_setup()
+service/list=nginx_list()
