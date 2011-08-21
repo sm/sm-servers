@@ -329,3 +329,14 @@ nginx_server_new()
       service_pid_file "${service_pid_file}" \
       service_log_path "${service_log_path}"
 }
+
+nginx_restart()
+{
+  if (( master_pid > 0 ))
+  then
+    kill -HUP $master_pid
+  else
+    service_init_restart
+  fi
+}
+
