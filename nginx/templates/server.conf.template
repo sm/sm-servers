@@ -21,6 +21,7 @@ server {
 
   location ~* ^.+\.(js|css|png|jpg|jpeg|gif|ico)$ {
     expires max;
+    try_files $uri @{{project}};
   }
 
   location /nginx/health {
@@ -34,7 +35,6 @@ server {
   }
 
   location / {
-    include {{service_config_path}}/conf/proxy.conf;
     try_files /system/maintenance.html $uri $uri/index.html $uri.html @{{project}};
   }
 

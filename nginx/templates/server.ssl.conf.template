@@ -33,10 +33,10 @@ server {
 
   location ~* ^.+\.(js|css|png|jpg|jpeg|gif|ico)$ {
     expires max;
+    try_files $uri @{{project}};
   }
 
   location / {
-    include /etc/nginx/conf/proxy.conf;
     try_files /system/maintenance.html $uri $uri/index.html $uri.html @{{project}};
   }
 
