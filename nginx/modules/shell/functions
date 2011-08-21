@@ -223,31 +223,35 @@ nginx_service_setup()
 
 nginx_list()
 {
-  local master_list=("$(ps auxww | head -1)") worker_list=()
+  local line header="$(ps auxww | head -1)" master_list=() worker_list=()
 
-  if (( master_pid > 0 ))
-  then
-    while read -r line
-    do
-      if [[ "$line" =~ nginx ]]
+  (( master_pid > 0 )) || succeed "No Nginx master processes was found."
+
+  while read -r line
+  do
+    if [[ "$line" =~ nginx ]]
+    then
+      if [[ "$line" =~ master ]]
       then
-        if [[ "$line" =~ master ]]
-        then
-          master_list+=("${line}")
-        elif [[ "$line" =~ worker ]]
-        then
-          worker_list+=("${line}")
-        fi
+        master_list+=("${line}")
+      elif [[ "$line" =~ worker ]]
+      then
+        worker_list+=("${line}")
       fi
-    done < <(ps auxww | awk '/[n]ginx/')
+    fi
+  done < <(ps auxww | awk '/[n]ginx/')
 
-    array_join master_list "\n"
-    echo
-    array_join worker_list "\n"
-    echo
-  else
-    log "No Nginx master processes was found."
-  fi
+  echo "$header"
+
+  for line in "${master_list[@]}"
+  do
+    echo "${line}"
+  done
+
+  for line in "${worker_list[@]}"
+  do
+    echo "${line}"
+  done
 }
 
 nginx_configure_root_etc()
