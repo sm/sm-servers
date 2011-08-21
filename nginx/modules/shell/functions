@@ -49,11 +49,8 @@ nginx_cli()
 
 nginx_initialize()
 {
-  if ! string_contains "{FUNCNAME[*]}" "extension_action_prerequisites"
-  then
-    string_contains "{FUNCNAME[*]}" "package_cli"        || package_cli
-    string_contains "{FUNCNAME[*]}" "service_initialize" || service_initialize
-  fi
+  package_cli
+  ext_service_initialize
 
   # TODO: Allow overriding of these parameters via cli
   # These defaults may be overridden also by the nginx configuration files.
