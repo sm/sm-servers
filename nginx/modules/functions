@@ -165,7 +165,10 @@ nginx_postactivate()
 {
   user_is_root || return 0
 
-  (( ${force_flag:=0} == 0 )) || remove_paths "${service_config_path}"
+  if (( ${force_flag:=0} ))
+  then
+    move_path "${service_config_path}" to "${service_config_path}.${timestamp}"
+  fi
 
   service_setup # create user, etc... then calls nginx_service_setup
 
