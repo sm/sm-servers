@@ -344,3 +344,8 @@ nginx_restart()
   fi
 }
 
+nginx_config_check()
+{
+  "${service_binary}" -t -c "${service_config_path}/nginx.conf"
+}
+

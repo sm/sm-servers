@@ -1,6 +1,8 @@
 list=nginx_list()
 conf/edit=conf/nginx_conf_edit()
 conf/help=conf/help
+config=nginx_config_check()
+config/check=nginx_config_check()
 configure/root_etc=configure/nginx_configure_root_etc()
 server/add=server/nginx_server_new()
 server/disable=server/disable
