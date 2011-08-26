@@ -72,15 +72,6 @@ nginx_initialize()
   # --with-imap
   # --with-imap_ssl_module
 
-  for library in zlib pcre # openssl
-  do
-    if package_is_active "$library"
-    then
-      configure_flags+=( --with-${library}="${packages_path}/versions/${library}/active/src" )
-    fi
-  done
-  unset library
-
   config_dirs=( conf servers users ssl )
   nginx_dirs=( log spool run lock etc/nginx tmp )
 
