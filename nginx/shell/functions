@@ -76,7 +76,7 @@ nginx_initialize()
   do
     if package_is_active "$library"
     then
-      configure_flags+=( --with-${library}="${packages_path}/${library}/active/src" )
+      configure_flags+=( --with-${library}="${packages_path}/versions/${library}/active/src" )
     fi
   done
   unset library
