@@ -138,18 +138,18 @@ nginx_postinstall()
       from "${install_path}/etc/nginx"
   fi
 
-  enter "${install_path}"
-  ensure_paths_exist "${nginx_dirs[@]}"
+  paths enter "${install_path}"
+  paths create "${nginx_dirs[@]}"
 
-  enter "${install_path}/etc/nginx"
-  ensure_paths_exist "${config_dirs[@]}"
+  paths enter "${install_path}/etc/nginx"
+  paths create "${config_dirs[@]}"
 
   # Cleanup default nginx install messy directory.
   move_files --if-exists "${nginx_files[@]}" \
     to "${install_path}/etc/nginx/conf" \
     from "${install_path}/etc/nginx"
 
-  ensure_paths_exist "${install_path}/config" "${install_path}/etc/nginx/servers"
+  paths create "${install_path}/config" "${install_path}/etc/nginx/servers"
 }
 
 nginx_postactivate()
@@ -167,7 +167,7 @@ nginx_postactivate()
   then
     link force from "${install_path}/etc/nginx" to "${service_config_path}"
 
-    enter "${service_config_path}"
+    paths enter "${service_config_path}"
 
     remove_files "${nginx_files[@]}"
   fi
@@ -189,7 +189,7 @@ nginx_service_setup()
     service_pid_file "${service_pid_file}" \
     service_log_path "${service_log_path}"
 
-  ensure_paths_exist "${install_path}/etc/nginx/health/"
+  paths create "${install_path}/etc/nginx/health/"
 
   install_template "nginx/nginx.health" \
     to "${install_path}/etc/nginx/health/nginx.conf" \
@@ -207,12 +207,12 @@ nginx_service_setup()
       mode 0644 owner "${service_user}"
   done
 
-  enter "${install_path}"
+  paths enter "${install_path}"
 
   replace_content "^user .*;$" with "# No user line for non-root installs "\
     in "${install_path}/etc/nginx/nginx.conf"
 
-  chown_paths --recursive "${service_user}" "${nginx_dirs[@]}" "etc/nginx"
+  paths chown recursive "${service_user}" "${nginx_dirs[@]}" "etc/nginx"
 }
 
 nginx_list()
@@ -250,10 +250,10 @@ nginx_list()
 
 nginx_configure_root_etc()
 {
-  (( force_flag )) || ! path_exists "/etc/nginx" ||
+  (( force_flag )) || ! path exists "/etc/nginx" ||
     error "/etc/nginx already exists, in order to re-configure pass the --force flag"
 
-  ensure_paths_exist "/etc/nginx"
+  paths create "/etc/nginx"
 
   cp -Rf "${install_path}"/etc/nginx/* "/etc/nginx/"
 }
@@ -296,13 +296,13 @@ nginx_server_new()
   template_exists "nginx/server.conf" ||
     fail "$FUNCNAME: $extension_templates_path/server.conf template is missing."
 
-  ensure_paths_exist "${service_config_path}/servers"
+  paths create "${service_config_path}/servers"
 
   # If this is running as root, ensure that Nginx can read from the
   # application directory.
-  if user_is_root && path_exists "/home/${project}"
+  if user_is_root && path exists "/home/${project}"
   then
-    chmod_paths --recursive 'g+rx' "/home/${project}"
+    paths chmod recursive 'g+rx' "/home/${project}"
   fi
 
   project_config="${service_config_path}/servers/${project}.conf"
