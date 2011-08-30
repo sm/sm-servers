@@ -93,14 +93,17 @@ nginx_initialize()
   service_flags=( -c "${service_config_path}/nginx.conf" )
   service_binary="${install_path}/sbin/nginx"
 
-  user_is_not_root || service_run_as_root_flag=1
+  if ! user is root
+  then
+    service_run_as_root_flag=1
+  fi
 }
 
 nginx_os_dependencies_install()
 {
   warn "${action} is untested / unused thus far."
 
-  if os_is_linux
+  if os is linux
   then
     if command_exists pacman
     then
@@ -121,7 +124,7 @@ nginx_os_dependencies_install()
     else
       log "TODO: Install zlib openssl pcre via curl, complile install."
     fi
-  elif os_is_darwin
+  elif os is darwin
   then
     release="( $(sw_vers -productName) )"
     log "Notes for ${system} $release for OSX be sure to have the latest XCode tools. "
@@ -154,7 +157,7 @@ nginx_postinstall()
 
 nginx_postactivate()
 {
-  user_is_root || return 0
+  user is root || return 0
 
   if (( ${force_flag:=0} ))
   then
@@ -300,7 +303,7 @@ nginx_server_new()
 
   # If this is running as root, ensure that Nginx can read from the
   # application directory.
-  if user_is_root && path exists "/home/${project}"
+  if user is root && path exists "/home/${project}"
   then
     paths chmod recursive 'g+rx' "/home/${project}"
   fi

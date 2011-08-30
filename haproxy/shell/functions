@@ -4,7 +4,7 @@ haproxy_initialize()
 {
   package_dependencies=( pcre )
 
-  package_definition \
+  package define \
     base_url "http://haproxy.1wt.eu/download/${package_version%.*}/src/" \
     docs_url "http://haproxy.1wt.eu/download/${package_version%.*}/doc/configuration.txt"
 
@@ -19,62 +19,62 @@ haproxy_initialize()
 haproxy_configure()
 {
   # We build generic since the Makefile.osx doesn't appear to work
-    if os_is_darwin
-    then
-      copy_file --force "Makefile.osx" to "Makefile"
+  if os is darwin
+  then
+    files copy force from "Makefile.osx" to "Makefile"
 
-      make_flags=(
-        PREFIX="${install_path}"
-        TARGET=generic
-        USE_KQUEUE=1
-        USE_POLL=1
-        PCREDIR="${active_path}"
-        SBINDIR="${install_path}/bin"
-        USE_STATIC_PCRE=1
-      )
-    elif os_is_linux
-    then
-      make_flags=(
-        PREFIX="${install_path}"
-        PCREDIR="${active_path}"
-        SBINDIR="${install_path}/bin"
-        USE_STATIC_PCRE=1
-      )
+    make_flags=(
+    PREFIX="${install_path}"
+    TARGET=generic
+    USE_KQUEUE=1
+    USE_POLL=1
+    PCREDIR="${active_path}"
+    SBINDIR="${install_path}/bin"
+    USE_STATIC_PCRE=1
+    )
+  elif os is linux
+  then
+    make_flags=(
+    PREFIX="${install_path}"
+    PCREDIR="${active_path}"
+    SBINDIR="${install_path}/bin"
+    USE_STATIC_PCRE=1
+    )
 
-      # TODO: TPROXY is only availablle in kernels 2.6.28 and newer, check.
-      # if os_kernel_version >= 2.6.28
-      # then
-      make_flags+=(USE_LINUX_TPROXY=1)
-      # fi
+    # TODO: TPROXY is only availablle in kernels 2.6.28 and newer, check.
+    # if os_kernel_version >= 2.6.28
+    # then
+    make_flags+=(USE_LINUX_TPROXY=1)
+    # fi
 
-      # TODO: Add in the check below
-      # if os_kernel_version >= 2.6
-      # then
-         make_flags+=(TARGET=linux26)
-      # else
-      #   make_flags+=(TARGET=generic)
-      # fi
-    else
-      make_flags=(
-        PREFIX="${install_path}"
-        PCREDIR="${active_path}"
-        SBINDIR="${install_path}/bin"
-        USE_STATIC_PCRE=1
-        TARGET=generic
-      )
-    fi
+    # TODO: Add in the check below
+    # if os_kernel_version >= 2.6
+    # then
+    make_flags+=(TARGET=linux26)
+    # else
+    #   make_flags+=(TARGET=generic)
+    # fi
+  else
+    make_flags=(
+    PREFIX="${install_path}"
+    PCREDIR="${active_path}"
+    SBINDIR="${install_path}/bin"
+    USE_STATIC_PCRE=1
+    TARGET=generic
+    )
+  fi
 
-    make_install_flags=( install ${make_flags[@]})
-    make_flags+=( -j$(os_cpu_count) )
+  make_install_flags=( install ${make_flags[@]})
+  make_flags+=( -j$(os_cpu_count) )
 
-    make "${make_flags[@]}"
+  make "${make_flags[@]}"
 }
 
 haproxy_postinstall()
 {
-  if user_is_root
+  if user is root
   then
-    if os_is_linux
+    if os is linux
     then
       if command_exists iptables
       then
