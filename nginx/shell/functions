@@ -7,7 +7,7 @@ nginx_cli()
 
   service initialize
 
-  if variable is empty domains
+  if variables are empty domains
   then
     domains=()
   fi
@@ -20,7 +20,7 @@ nginx_cli()
       (domain)
         _domain="${_package_args[$((++index))]}"
         _domain="${_domain//,/ }"
-        if variable is empty _domain
+        if variables are empty _domain
         then
           error "$FUNCNAME: a domain must follow keyword 'domain'"
         fi
@@ -28,21 +28,21 @@ nginx_cli()
         ;;
       (project)
         project="${_package_args[$((++index))]}"
-        if variable is empty project
+        if variables are empty project
         then
           error "$FUNCNAME: a project name must follow keyword 'project'"
         fi
         ;;
       (user)
         project_user="${_package_args[$((++index))]}"
-        if variable is empty project_user
+        if variables are empty project_user
         then
           error "$FUNCNAME: a project user name must follow keyword 'user'"
         fi
         ;;
       (path)
         project_path="${_package_args[$((++index))]}"
-        if variable is empty project_path
+        if variables are empty project_path
         then
           error "$FUNCNAME: a project path name must follow keyword 'path'"
         fi
@@ -301,14 +301,14 @@ nginx_server_conf_edit()
 
 nginx_server_new_cli()
 {
-  if variable is empty project
+  if variables are empty project
   then
     array shift extension_args project
   fi
 
   true ${project:=$1}
 
-  if variable is empty project
+  if variables are empty project
   then
     fail "$FUNCNAME: project name must be given."
   fi
