@@ -2,46 +2,58 @@
 
 nginx_cli()
 {
-  local _ignored_args=() _package_args=( $@ ) _token index \
+  local _ignored_args=() _package_args=( "$@" ) _token index \
     _count=${#_package_args[@]} _domain
 
-  variable_is_nonempty domains || domains=()
+  service initialize
+
+  if variable is empty domains
+  then
+    domains=()
+  fi
 
   for (( index=0 ; index < $_count ; index++ ))
   do
     _token="${_package_args[$index]}"
 
     case "${_token}" in
-      domain)
+      (domain)
         _domain="${_package_args[$((++index))]}"
         _domain="${_domain//,/ }"
-        variable_is_nonempty _domain ||
+        if variable is empty _domain
+        then
           error "$FUNCNAME: a domain must follow keyword 'domain'"
+        fi
         domains+=(${_domain})
         ;;
-      project)
+      (project)
         project="${_package_args[$((++index))]}"
-        variable_is_nonempty project ||
+        if variable is empty project
+        then
           error "$FUNCNAME: a project name must follow keyword 'project'"
+        fi
         ;;
-      user)
+      (user)
         project_user="${_package_args[$((++index))]}"
-        variable_is_nonempty project_user ||
+        if variable is empty project_user
+        then
           error "$FUNCNAME: a project user name must follow keyword 'user'"
+        fi
         ;;
-      path)
+      (path)
         project_path="${_package_args[$((++index))]}"
-        variable_is_nonempty project_path ||
+        if variable is empty project_path
+        then
           error "$FUNCNAME: a project path name must follow keyword 'path'"
+        fi
         ;;
-      edit)
+      (edit)
         edit_flag=1
         ;;
       *)
         _ignored_args+=("${_token}")
         ;;
     esac
-
   done
 
   nginx_initialize "${_ignored_args[@]}"
@@ -49,8 +61,7 @@ nginx_cli()
 
 nginx_initialize()
 {
-  package_cli
-  ext_service_initialize
+  package cli
 
   # TODO: Allow overriding of these parameters via cli
   # These defaults may be overridden also by the nginx configuration files.
@@ -74,7 +85,6 @@ nginx_initialize()
 
   config_dirs=( conf servers users ssl )
   nginx_dirs=( log spool run lock etc/nginx tmp )
-
   nginx_files=( fastcgi.conf fastcgi.conf.default fastcgi_params
   fastcgi_params.default koi-utf koi-win mime.types mime.types.default
   nginx.conf.default scgi_params scgi_params.default uwsgi_params
@@ -92,11 +102,6 @@ nginx_initialize()
   master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
   service_flags=( -c "${service_config_path}/nginx.conf" )
   service_binary="${install_path}/sbin/nginx"
-
-  if ! user is root
-  then
-    service_run_as_root_flag=1
-  fi
 }
 
 nginx_os_dependencies_install()
@@ -105,19 +110,19 @@ nginx_os_dependencies_install()
 
   if os is linux
   then
-    if command_exists pacman
+    if command exists pacman
     then
       pacman -S --noconfirm patch curl zlib pcre openssl make base-devel
 
-    elif command_exists apt-get
+    elif command exists apt-get
     then
       apt-get install build-essential openssl curl zlib1g zlib1g-dev libssl-dev pcre pcre-dev
 
-    elif command_exists yum
+    elif command exists yum
     then
       yum install -y gcc-c++ patch zlib zlib-devel openssl openssl-devel pcre pcre-devel
 
-    elif command_exists emerge
+    elif command exists emerge
     then
       log "TODO: Tell wayne how to install pcre, openssl and zlib dev headers on gentoo."
 
@@ -148,7 +153,7 @@ nginx_postinstall()
   paths create "${config_dirs[@]}"
 
   # Cleanup default nginx install messy directory.
-  move_files --if-exists "${nginx_files[@]}" \
+  files move "${nginx_files[@]}" \
     to "${install_path}/etc/nginx/conf" \
     from "${install_path}/etc/nginx"
 
@@ -161,30 +166,36 @@ nginx_postactivate()
 
   if (( ${force_flag:=0} ))
   then
-    move_path "${service_config_path}" to "${service_config_path}.${timestamp}"
+    paths move \
+      from "${service_config_path}" \
+      to "${service_config_path}.${timestamp}"
   fi
 
-  service_setup # create user, etc... then calls nginx_service_setup
+  service setup # create user, etc... then calls nginx_service_setup
 
-  if ! file_exists "${service_config_path}/nginx.conf"
+  if ! files exist "${service_config_path}/nginx.conf"
   then
-    link force from "${install_path}/etc/nginx" to "${service_config_path}"
+    link force \
+      from "${install_path}/etc/nginx" \
+      to "${service_config_path}"
 
     paths enter "${service_config_path}"
 
-    remove_files "${nginx_files[@]}"
+    files remove "${nginx_files[@]}"
   fi
 
-  link force from "${install_path}/sbin/nginx" to "${active_path}/sbin/nginx"
+  link force \
+    from "${install_path}/sbin/nginx" \
+    to "${active_path}/sbin/nginx"
 }
 
 nginx_service_setup()
 {
-  install_template "nginx/nginx.conf" \
+  templates install "nginx/nginx.conf" \
     to "${install_path}/etc/nginx/nginx.conf" \
     mode 0644 owner "${service_user}"
 
-  seed_template "${install_path}/etc/nginx/nginx.conf" \
+  templates seed "${install_path}/etc/nginx/nginx.conf" \
     modules_path "${modules_path}" \
     service "${service}" \
     service_user "${service_user}" \
@@ -194,25 +205,27 @@ nginx_service_setup()
 
   paths create "${install_path}/etc/nginx/health/"
 
-  install_template "nginx/nginx.health" \
+  templates install "nginx/nginx.health" \
     to "${install_path}/etc/nginx/health/nginx.conf" \
     mode 0644 owner "${service_user}"
 
-  install_template "nginx/nginx" to "${install_path}/etc/nginx" \
+  templates install "nginx/nginx" \
+    to "${install_path}/etc/nginx" \
     mode 0755 owner "${service_user}"
 
   templates=( "mime.types" "proxy.conf" )
 
   for template in "${templates[@]}"
   do
-    install_template "nginx/${template}" \
+    templates install "nginx/${template}" \
       to "${install_path}/etc/nginx/conf/${template}" \
       mode 0644 owner "${service_user}"
   done
 
   paths enter "${install_path}"
 
-  replace_content "^user .*;$" with "# No user line for non-root installs "\
+  files replace content "^user .*;$" \
+    with "# No user line for non-root installs "\
     in "${install_path}/etc/nginx/nginx.conf"
 
   paths chown recursive "${service_user}" "${nginx_dirs[@]}" "etc/nginx"
@@ -263,7 +276,7 @@ nginx_configure_root_etc()
 
 nginx_conf_edit()
 {
-  if command_exists vim
+  if command exists vim
   then
     ${EDITOR:=vim}
   else
@@ -276,7 +289,7 @@ nginx_conf_edit()
 
 nginx_server_conf_edit()
 {
-  if command_exists vim
+  if command exists vim
   then
     ${EDITOR:=vim}
   else
@@ -288,16 +301,27 @@ nginx_server_conf_edit()
 
 nginx_server_new_cli()
 {
-  variable_is_nonempty project || array_shift extension_args project
+  if variable is empty project
+  then
+    array shift extension_args project
+  fi
+
   true ${project:=$1}
-  variable_is_nonempty project || fail "$FUNCNAME: project name must be given."
+
+  if variable is empty project
+  then
+    fail "$FUNCNAME: project name must be given."
+  fi
+
   nginx_cli
 }
 
 nginx_server_new()
 {
-  template_exists "nginx/server.conf" ||
+  if ! templates exist "nginx/server.conf"
+  then
     fail "$FUNCNAME: $extension_templates_path/server.conf template is missing."
+  fi
 
   paths create "${service_config_path}/servers"
 
@@ -315,11 +339,15 @@ nginx_server_new()
     remove_file "${project_config}"
   fi
 
-  file_exists "${project_config}" ||
-    install_template "nginx/server.conf" to "${project_config}"
+  if ! files exist "${project_config}"
+  then
+    templates install "nginx/server.conf" \
+      to "${project_config}"
+  fi
 
-  ! file_exists "${project_config}" ||
-    seed_template "${project_config}" \
+  if files exist "${project_config}"
+  then
+    templates seed "${project_config}" \
       modules_path "${modules_path}" \
       service "${service}" \
       project "${project}" \
@@ -329,6 +357,7 @@ nginx_server_new()
       service_config_path "${service_config_path}" \
       service_pid_file "${service_pid_file}" \
       service_log_path "${service_log_path}"
+  fi
 }
 
 nginx_restart()
@@ -337,7 +366,7 @@ nginx_restart()
   then
     kill -HUP $master_pid
   else
-    service_init_restart
+    service restart
   fi
 }
 
