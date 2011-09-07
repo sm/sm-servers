@@ -80,9 +80,9 @@ nginx_initialize()
 
   for _pkg in pcre zlib
   do
-    if package is active ${_pkg}
+    if package is active pcre
     then
-      configure_flags+=( --with-${_pkg}-dir=${sm_path}/pkg/active )
+      configure_flags+=( --with-${_pkg}=${sm_path}/pkg/active )
     fi
   done
 
