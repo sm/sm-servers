@@ -80,7 +80,7 @@ nginx_initialize()
 
   for _pkg in pcre zlib
   do
-    if package is active pcre
+    if package is active ${_pkg}
     then
       configure_flags+=( --with-${_pkg}=${sm_path}/pkg/active )
     fi
@@ -181,7 +181,7 @@ nginx_postactivate()
 
   if ! files exist "${service_config_path}/nginx.conf"
   then
-    link force \
+    files link symbolic force \
       from "${install_path}/etc/nginx" \
       to "${service_config_path}"
 
@@ -190,7 +190,7 @@ nginx_postactivate()
     files remove "${nginx_files[@]}"
   fi
 
-  link force \
+  files link symbolic force \
     from "${install_path}/sbin/nginx" \
     to "${active_path}/sbin/nginx"
 }
