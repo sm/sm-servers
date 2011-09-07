@@ -78,6 +78,14 @@ nginx_initialize()
   --with-http_stub_status_module
   )
 
+  for _pkg in pcre zlib
+  do
+    if package is active ${_pkg}
+    then
+      configure_flags+=( --with-${_pkg}-dir=${sm_path}/pkg/active )
+    fi
+  done
+
   package cli
 
   # TODO: Add a CLI --imap flag
@@ -91,9 +99,6 @@ nginx_initialize()
   nginx.conf.default scgi_params scgi_params.default uwsgi_params
   uwsgi_params.default win-utf
   )
-
-  LDFLAGS="-L${active_path}/lib ${LDFLAGS:-}"
-  CFLAGS="-I${active_path}/include ${CFLAGS:-} "
 
   true \
     ${edit_flag:=0} \
@@ -140,9 +145,9 @@ nginx_os_dependencies_install()
 
 nginx_postinstall()
 {
-  if file_exists "nginx.conf"
+  if files exist "nginx.conf"
   then
-    move_file "nginx.conf" \
+    files move "nginx.conf" \
       to "${install_path}/etc/nginx/conf/nginx.conf.default" \
       from "${install_path}/etc/nginx"
   fi
@@ -272,6 +277,7 @@ nginx_configure_root_etc()
 
   paths create "/etc/nginx"
 
+  # files copy to "/etc/nginx/" "${install_path}"/etc/nginx/*
   cp -Rf "${install_path}"/etc/nginx/* "/etc/nginx/"
 }
 
