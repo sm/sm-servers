@@ -8,7 +8,7 @@ server {
 
   server_name {{domains}};
 
-  root {{project_path}}/release/public;
+  root {{project_path}}/active/{{project}}/public;
 
   access_log {{project_path}}/shared/log/{{project}}.com.access.log;
   error_log  {{project_path}}/shared/log/{{project}}.com.error.log  info;
@@ -45,6 +45,6 @@ server {
 
   error_page   500 502 503 504  /500.html;
   location = /500.html {
-    root   {{project_path}}/release/public;
+    root   {{project_path}}/active/{{project}}/public;
   }
 }

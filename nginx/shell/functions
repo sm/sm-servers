@@ -102,8 +102,7 @@ nginx_initialize()
 
   true \
     ${edit_flag:=0} \
-    ${project_user:=${project}} \
-    ${domains:=("${project}.com" "*${project}.com")}
+    ${project_user:=${project}}
 
   master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
   service_flags=( -c "${service_config_path}/nginx.conf" )
@@ -350,6 +349,11 @@ nginx_server_new()
   then
     templates install "nginx/server.conf" \
       to "${project_config}"
+  fi
+
+  if array is empty domains
+  then
+    domains=("${project}.com" "*.${project}.com")
   fi
 
   if files exist "${project_config}"
