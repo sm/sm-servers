@@ -274,15 +274,19 @@ nginx_list()
   done
 }
 
-nginx_configure_root_etc()
+nginx_configure_system_etc()
 {
   (( force_flag )) || ! path exists "/etc/nginx" ||
-    error "/etc/nginx already exists, in order to re-configure pass the force flag"
+    error "/etc/nginx exists; To re-configure pass the 'force' flag"
 
-  paths create "/etc/nginx"
+  if path exists /etc/nginx
+  then
+    path move from /etc/nginx to /etc/nginx.${timestamp}
+  fi
 
-  # files copy to "/etc/nginx/" "${install_path}"/etc/nginx/*
-  cp -Rf "${install_path}"/etc/nginx/* "/etc/nginx/"
+  files link symbolic \
+    from "${install_path}"/etc/nginx \
+    to /etc/nginx
 }
 
 nginx_conf_edit()
