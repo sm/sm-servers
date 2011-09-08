@@ -83,17 +83,17 @@ nginx_initialize()
   --with-http_stub_status_module
   )
 
-  if package is active pcre
-  then
-    pcre=$(__sm.packages.active pcre)
-    configure_flags+=( --with-pcre="${sm_path}/src/pcre-${pcre##*:}" )
-    unset pcre
-  fi
+  # if package is active pcre
+  # then
+  #   pcre=$(__sm.packages.active pcre)
+  #   configure_flags+=( --with-pcre="${sm_path}/src/pcre-${pcre##*:}" )
+  #   unset pcre
+  # fi
 
-  if package is active zlib
-  then
-    configure_flags+=( --with-zlib=${sm_path}/pkg/active )
-  fi
+  # if package is active zlib
+  # then
+  #   configure_flags+=( --with-zlib=${sm_path}/pkg/active )
+  # fi
 
   package cli
 
