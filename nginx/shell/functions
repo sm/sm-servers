@@ -47,8 +47,13 @@ nginx_cli()
           error "$FUNCNAME: a project path name must follow keyword 'path'"
         fi
         ;;
+      (force)
+        force_flag=1
+        true $((++index))
+        ;;
       (edit)
         edit_flag=1
+        true $((++index))
         ;;
       *)
         _ignored_args+=("${_token}")
@@ -272,7 +277,7 @@ nginx_list()
 nginx_configure_root_etc()
 {
   (( force_flag )) || ! path exists "/etc/nginx" ||
-    error "/etc/nginx already exists, in order to re-configure pass the --force flag"
+    error "/etc/nginx already exists, in order to re-configure pass the force flag"
 
   paths create "/etc/nginx"
 
