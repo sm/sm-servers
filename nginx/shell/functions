@@ -336,7 +336,7 @@ nginx_server_new()
   # application directory.
   if user is root && path exists "/home/${project}"
   then
-    paths chmod recursive 'g+rx' "/home/${project}"
+    path chmod 'g+rx' recursive "/home/${project}"
   fi
 
   project_config="${service_config_path}/servers/${project}.conf"
