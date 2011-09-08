@@ -85,7 +85,9 @@ nginx_initialize()
 
   if package is active pcre
   then
-    configure_flags+=( --with-pcre )
+    pcre=$(__sm.packages.active pcre)
+    configure_flags+=( --with-pcre="${sm_path}/src/pcre-${pcre##*:}" )
+    unset pcre
   fi
 
   if package is active zlib
