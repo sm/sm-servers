@@ -87,7 +87,7 @@ nginx_initialize()
   do
     if package is active ${_pkg}
     then
-      configure_flags+=( --with-${_pkg}=${sm_path}/pkg/active )
+      configure_flags+=( --with-${_pkg} ) # =${sm_path}/pkg/active )
     fi
   done
 
@@ -281,11 +281,13 @@ nginx_configure_system_etc()
 
   if path exists /etc/nginx
   then
-    path move from /etc/nginx to /etc/nginx.${timestamp}
+    path move \
+      from /etc/nginx \
+      to /etc/nginx.${timestamp}
   fi
 
   files link symbolic \
-    from "${install_path}"/etc/nginx \
+    from "${install_path}/etc/nginx" \
     to /etc/nginx
 }
 
