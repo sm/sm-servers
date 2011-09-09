@@ -246,7 +246,7 @@ nginx_service_setup()
   paths enter "${install_path}"
 
   files replace content "^user .*;$" \
-    with "# No user line for non-root installs "\
+    with "\# No user line for non-root installs" \
     in "${install_path}/etc/nginx/nginx.conf"
 
   paths chown "${service_user}" recursive "${nginx_dirs[@]}" "etc/nginx"
