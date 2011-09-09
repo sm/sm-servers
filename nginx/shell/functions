@@ -3,7 +3,7 @@
 nginx_cli()
 {
   local _ignored_args=() _package_args=( "$@" ) _token index \
-    _count=${#_package_args[@]} _domain
+    _count=${#_package_args[@]} _domain __domain
 
   service initialize
 
@@ -24,7 +24,13 @@ nginx_cli()
         then
           error "$FUNCNAME: a domain must follow keyword 'domain'"
         fi
-        domains+=(${_domain})
+        for __domain in ${_domain}
+        do
+          if ! __sm.string.contains "${__domain}" "${domains[*]}"
+          then
+            domains+=( "${__domain}" )
+          fi
+        done
         ;;
       (project)
         project="${_package_args[$((++index))]}"
@@ -340,6 +346,8 @@ nginx_server_new_cli()
 
 nginx_server_new()
 {
+  local domain="${project}"
+
   if ! templates exist "nginx/server.conf"
   then
     fail "$FUNCNAME: $extension_templates_path/server.conf template is missing."
@@ -367,9 +375,14 @@ nginx_server_new()
       to "${project_config}"
   fi
 
+  if ! __sm.string.contains "\." "${domain}"
+  then
+    domain="${domain}.com"
+  fi
+
   if array is empty domains
   then
-    domains=("${project}.com" "*.${project}.com")
+    domains=("${domain}" "*.${domain}")
   fi
 
   if files exist "${project_config}"
@@ -378,6 +391,7 @@ nginx_server_new()
       modules_path "${modules_path}" \
       service "${service}" \
       project "${project}" \
+      domain "${domain}" \
       domains "${domains[*]}" \
       project_path ${project_path:="/home/${project_user:-${project}}"} \
       project_user "${project_user}" \
