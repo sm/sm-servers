@@ -375,7 +375,7 @@ nginx_server_new()
       to "${project_config}"
   fi
 
-  if ! __sm.string.contains "\." "${domain}"
+  if ! [[ "${domain}" =~ "." ]]
   then
     domain="${domain}.com"
   fi
