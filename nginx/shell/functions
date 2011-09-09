@@ -178,7 +178,8 @@ nginx_postactivate()
 {
   user is root || return 0
 
-  if (( ${force_flag:=0} ))
+  if (( ${force_flag:=0} )) &&
+    paths exists "${service_config_path}"
   then
     paths move \
       from "${service_config_path}" \
