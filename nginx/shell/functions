@@ -101,8 +101,6 @@ nginx_initialize()
   #   configure_flags+=( --with-zlib=${sm_path}/pkg/active )
   # fi
 
-  package cli
-
   # TODO: Add a CLI --imap flag
   # --with-imap
   # --with-imap_ssl_module
