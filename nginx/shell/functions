@@ -116,8 +116,8 @@ nginx_preconfigure()
 
 nginx_initialize()
 {
-  typeset -A config_dirs nginx_dirs nginx_files service_flags
-  typeset -i master_pid
+  typeset -ga config_dirs nginx_dirs nginx_files service_flags
+  typeset -g master_pid
 
   config_dirs=( conf servers users ssl )
   nginx_dirs=( log spool run lock etc/nginx tmp )
