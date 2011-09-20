@@ -2,8 +2,13 @@
 
 nginx_cli()
 {
-  local _ignored_args=() _package_args=( "$@" ) _token index \
-    _count=${#_package_args[@]} _domain __domain
+  trace_filter nginx || set -o xtrace
+  typeset -g project project_user project_path force_flag edit_flag
+  typeset -ga domains
+  local _ignored_args _package_args _token index _count _domain __domain
+  _ignored_args=()
+  _package_args=( "$@" )
+  _count=${#_package_args[@]}
 
   service initialize
 
@@ -72,6 +77,9 @@ nginx_cli()
 
 nginx_preconfigure()
 {
+  trace_filter nginx || set -o xtrace
+  typeset -ga configure_flags config_dirs nginx_dirs nginx_files
+  typeset -g master_pid service_binary
   # TODO: Allow overriding of these parameters via cli
   # These defaults may be overridden also by the nginx configuration files.
   configure_flags=(
@@ -124,6 +132,7 @@ nginx_initialize()
 
 nginx_os_dependencies_install()
 {
+  trace_filter nginx || set -o xtrace
   warn "${action} is untested / unused thus far."
 
   if os is linux
@@ -157,6 +166,7 @@ nginx_os_dependencies_install()
 
 nginx_postinstall()
 {
+  trace_filter nginx || set -o xtrace
   if files exist "nginx.conf"
   then
     files move "nginx.conf" \
@@ -180,6 +190,7 @@ nginx_postinstall()
 
 nginx_postactivate()
 {
+  trace_filter nginx || set -o xtrace
   user is root || return 0
 
   if (( ${force_flag:=0} )) &&
@@ -210,6 +221,9 @@ nginx_postactivate()
 
 nginx_service_setup()
 {
+  trace_filter nginx || set -o xtrace
+  typeset templates template
+
   templates install "nginx/nginx.conf" \
     to "${install_path}/etc/nginx/nginx.conf" \
     mode 0644 owner "${service_user}"
@@ -243,8 +257,9 @@ nginx_service_setup()
 
   paths enter "${install_path}"
 
-  files replace content "^user .*;$" \
-    with "\# No user line for non-root installs" \
+  files replace \
+    regexp "^user .*;$" \
+    with "# No user line for non-root installs" \
     in "${install_path}/etc/nginx/nginx.conf"
 
   paths chown "${service_user}" recursive "${nginx_dirs[@]}" "etc/nginx"
@@ -252,6 +267,7 @@ nginx_service_setup()
 
 nginx_list()
 {
+  trace_filter nginx || set -o xtrace
   local line header="$(ps auxww | head -1)" master_list=() worker_list=()
 
   (( master_pid > 0 )) || succeed "No Nginx master processes was found."
@@ -285,6 +301,7 @@ nginx_list()
 
 nginx_configure_system_etc()
 {
+  trace_filter nginx || set -o xtrace
   (( force_flag )) || ! path exists "/etc/nginx" ||
     error "/etc/nginx exists; To re-configure pass the 'force' flag"
 
@@ -302,6 +319,7 @@ nginx_configure_system_etc()
 
 nginx_conf_edit()
 {
+  trace_filter nginx || set -o xtrace
   if command exists vim
   then
     ${EDITOR:=vim}
@@ -315,6 +333,7 @@ nginx_conf_edit()
 
 nginx_server_conf_edit()
 {
+  trace_filter nginx || set -o xtrace
   if command exists vim
   then
     ${EDITOR:=vim}
@@ -327,6 +346,7 @@ nginx_server_conf_edit()
 
 nginx_server_new_cli()
 {
+  trace_filter nginx || set -o xtrace
   if variables are empty project
   then
     array shift extension_args project
@@ -344,6 +364,7 @@ nginx_server_new_cli()
 
 nginx_server_new()
 {
+  trace_filter nginx || set -o xtrace
   local domain="${project}"
 
   if ! templates exist "nginx/server.conf"
@@ -401,6 +422,7 @@ nginx_server_new()
 
 nginx_restart()
 {
+  trace_filter nginx || set -o xtrace
   if (( master_pid > 0 ))
   then
     kill -HUP $master_pid
@@ -411,6 +433,7 @@ nginx_restart()
 
 nginx_config_check()
 {
+  trace_filter nginx || set -o xtrace
   "${service_binary}" -t -c "${service_config_path}/nginx.conf"
 }
 
