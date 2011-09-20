@@ -70,7 +70,7 @@ nginx_cli()
   nginx_initialize "${_ignored_args[@]}"
 }
 
-nginx_initialize()
+nginx_preconfigure()
 {
   # TODO: Allow overriding of these parameters via cli
   # These defaults may be overridden also by the nginx configuration files.
@@ -104,7 +104,10 @@ nginx_initialize()
   # TODO: Add a CLI --imap flag
   # --with-imap
   # --with-imap_ssl_module
+}
 
+nginx_initialize()
+{
   config_dirs=( conf servers users ssl )
   nginx_dirs=( log spool run lock etc/nginx tmp )
   nginx_files=( fastcgi.conf fastcgi.conf.default fastcgi_params
@@ -113,13 +116,10 @@ nginx_initialize()
   uwsgi_params.default win-utf
   )
 
-  true \
-    ${edit_flag:=0} \
-    ${project_user:=${project}}
+  true ${edit_flag:=0} ${project_user:=${project}}
 
   master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
   service_flags=( -c "${service_config_path}/nginx.conf" )
-  service_binary="${install_path}/sbin/nginx"
 }
 
 nginx_os_dependencies_install()
