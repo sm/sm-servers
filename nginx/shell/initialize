@@ -1,5 +1,0 @@
-#!/bin/sh
-
-typeset -A config_dirs nginx_dirs nginx_files service_flags
-typeset -i master_pid
-

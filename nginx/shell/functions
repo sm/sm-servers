@@ -116,6 +116,9 @@ nginx_preconfigure()
 
 nginx_initialize()
 {
+  typeset -A config_dirs nginx_dirs nginx_files service_flags
+  typeset -i master_pid
+
   config_dirs=( conf servers users ssl )
   nginx_dirs=( log spool run lock etc/nginx tmp )
   nginx_files=( fastcgi.conf fastcgi.conf.default fastcgi_params

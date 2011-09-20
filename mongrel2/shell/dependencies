@@ -1,2 +1,2 @@
-zeromq
-sqlite3
+libraries/zeromq
+databases/sqlite3

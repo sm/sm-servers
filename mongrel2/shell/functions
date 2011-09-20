@@ -1,5 +1,10 @@
 #!/bin/sh
 
+mongrel2_initialize()
+{
+  service_port=6767
+}
+
 mongrel2_configure()
 {
   true
@@ -8,7 +13,7 @@ mongrel2_configure()
 mongrel2_build()
 {
   OPTFLAGS="-I${active_path}/include -L${active_path}/lib" \
-    PREFIX="${install_path}" make > make.log 2>&1
+    PREFIX="${install_path}" make clean all > make.log 2>&1
 }
 
 mongrel2_install()
@@ -18,4 +23,18 @@ mongrel2_install()
     PREFIX="${install_path}" make install > make.install.log 2>&1
 }
 
+mongrel2_postinstall()
+{
+  cp "${PWD}/examples/configs/sample.conf" mysite.conf
 
+  template install server.conf to ...
+  path enter ...
+  m2sh load -config server.conf
+}
+
+mongrel2_start()
+{
+  # in the mongrel2 source directory
+  paths create run logs tmp
+  m2sh start -host localhost
+}
