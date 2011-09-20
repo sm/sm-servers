@@ -1,0 +1,5 @@
+#!/bin/sh
+
+typedef -A config_dirs nginx_dirs nginx_files service_flags
+typedef -i master_pid
+
