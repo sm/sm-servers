@@ -271,7 +271,9 @@ nginx_service_setup()
 nginx_list()
 {
   trace_filter nginx || set -o xtrace
-  local line header="$(ps auxww | head -1)" master_list=() worker_list=()
+  local line header
+  typeset -a master_list worker_list
+  header="$(ps auxww | head -1)"
 
   (( master_pid > 0 )) || succeed "No Nginx master processes was found."
 
@@ -305,8 +307,11 @@ nginx_list()
 nginx_configure_system_etc()
 {
   trace_filter nginx || set -o xtrace
-  (( force_flag )) || ! path exists "/etc/nginx" ||
-    error "/etc/nginx exists; To re-configure pass the 'force' flag"
+
+  if ! (( force_flag )) && path exists "/etc/nginx"
+  then
+    error "/etc/nginx exists; To force re-configure use the 'force'"
+  fi
 
   if path exists /etc/nginx
   then
