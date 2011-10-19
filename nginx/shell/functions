@@ -170,9 +170,10 @@ nginx_os_dependencies_install()
 nginx_postinstall()
 {
   trace_filter nginx || set -o xtrace
+
   if files exist "nginx.conf"
   then
-    files move "nginx.conf" \
+    file move "nginx.conf" \
       to "${install_path}/etc/nginx/conf/nginx.conf.default" \
       from "${install_path}/etc/nginx"
   fi
@@ -208,7 +209,7 @@ nginx_postactivate()
 
   if ! files exist "${service_config_path}/nginx.conf"
   then
-    files link symbolic force \
+    file link symbolic force \
       from "${install_path}/etc/nginx" \
       to "${service_config_path}"
 
@@ -227,11 +228,11 @@ nginx_service_setup()
   trace_filter nginx || set -o xtrace
   typeset templates template
 
-  templates install "nginx/nginx.conf" \
+  template install "nginx/nginx.conf" \
     to "${install_path}/etc/nginx/nginx.conf" \
     mode 0644 owner "${service_user}"
 
-  templates seed "${install_path}/etc/nginx/nginx.conf" \
+  template seed "${install_path}/etc/nginx/nginx.conf" \
     modules_path "${modules_path}" \
     service "${service}" \
     service_user "${service_user}" \

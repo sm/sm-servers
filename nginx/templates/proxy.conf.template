@@ -1,14 +1,16 @@
 index index.html index.htm;
 
-# needed to forward user's IP address to rails
+#
+# Proxy Headers
+#
+# needed to forward user's IP address to proxied server
 proxy_set_header  X-Real-IP         $remote_addr;
 proxy_set_header  X-Forwarded-For   $proxy_add_x_forwarded_for;
 proxy_set_header  Host              $http_host;
+#proxy_set_header Host              $host;
 proxy_set_header  X_FORWARDED_PROTO $scheme;
-
-proxy_redirect off;
-proxy_max_temp_file_size 0;
-
 # proxy_headers_hash_max_size  1024;
 proxy_headers_hash_bucket_size 128;
+
+proxy_redirect off;
 
