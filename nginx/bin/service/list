@@ -1,0 +1,35 @@
+#!/bin/sh
+
+trace_filter nginx || set -o xtrace
+local line header
+typeset -a master_list worker_list
+header="$(ps auxww | head -1)"
+
+(( master_pid > 0 )) || succeed "No Nginx master processes was found."
+
+while read -r line
+do
+  if [[ "$line" =~ nginx ]]
+  then
+    if [[ "$line" =~ master ]]
+    then
+      master_list+=("${line}")
+    elif [[ "$line" =~ worker ]]
+    then
+      worker_list+=("${line}")
+    fi
+  fi
+done < <(ps auxww | awk '/[n]ginx/')
+
+echo "$header"
+
+for line in "${master_list[@]}"
+do
+  echo "${line}"
+done
+
+for line in "${worker_list[@]}"
+do
+  echo "${line}"
+done
+

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+trace_filter nginx || set -o xtrace
+if command exists vim
+then
+  ${EDITOR:=vim}
+else
+  ${EDITOR:=vi}
+fi
+
+${EDITOR} "${service_config_path}/servers/${project:-"${extension_args[0]}"}.conf"

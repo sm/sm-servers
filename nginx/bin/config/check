@@ -1,0 +1,4 @@
+#!/bin/sh
+
+trace_filter nginx || set -o xtrace
+"${service_binary}" -t -c "${service_config_path}/nginx.conf"

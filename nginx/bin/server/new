@@ -1,0 +1,56 @@
+#!/bin/sh
+
+trace_filter nginx || set -o xtrace
+local domain="${project}"
+
+if ! templates exist "nginx/server.conf"
+then
+  fail "$FUNCNAME: $extension_templates_path/server.conf template is missing."
+fi
+
+paths create "${service_config_path}/servers"
+
+# If this is running as root, ensure that Nginx can read from the
+# application directory.
+if user is root && path exists "/home/${project}"
+then
+  path chmod 'g+rx' recursive "/home/${project}"
+fi
+
+project_config="${service_config_path}/servers/${project}.conf"
+
+if (( force_flag == 1 )) && file_exists "${project_config}"
+then
+  remove_file "${project_config}"
+fi
+
+if ! files exist "${project_config}"
+then
+  templates install "nginx/server.conf" \
+    to "${project_config}"
+fi
+
+if ! [[ "${domain}" =~ "." ]]
+then
+  domain="${domain}.com"
+fi
+
+if array is empty domains
+then
+  domains=("${domain}" "*.${domain}")
+fi
+
+if files exist "${project_config}"
+then
+  templates seed "${project_config}" \
+    modules_path "${modules_path}" \
+    service "${service}" \
+    project "${project}" \
+    domain "${domain}" \
+    domains "${domains[*]}" \
+    project_path ${project_path:="/home/${project_user:-${project}}"} \
+    project_user "${project_user}" \
+    service_config_path "${service_config_path}" \
+    service_pid_file "${service_pid_file}" \
+    service_log_path "${service_log_path}"
+fi

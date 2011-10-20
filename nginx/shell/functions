@@ -75,6 +75,25 @@ nginx_cli()
   nginx_initialize "${_ignored_args[@]}"
 }
 
+nginx_server_new_cli()
+{
+  trace_filter nginx || set -o xtrace
+  if variable is empty project
+  then
+    array shift extension_args project
+  fi
+
+  true ${project:=$1}
+
+  if variables are empty project
+  then
+    fail "$FUNCNAME: project name must be given."
+  fi
+
+  nginx_cli
+}
+
+# Hook before package is configured
 nginx_preconfigure()
 {
   trace_filter nginx || set -o xtrace
@@ -167,6 +186,7 @@ nginx_os_dependencies_install()
   echo
 }
 
+# Hook after installation of nginx package
 nginx_postinstall()
 {
   trace_filter nginx || set -o xtrace
@@ -192,6 +212,7 @@ nginx_postinstall()
   paths create "${install_path}/config" "${install_path}/etc/nginx/servers"
 }
 
+# Hook after activation of nginx package
 nginx_postactivate()
 {
   trace_filter nginx || set -o xtrace
@@ -268,181 +289,3 @@ nginx_service_setup()
 
   paths chown "${service_user}" recursive "${nginx_dirs[@]}" "etc/nginx"
 }
-
-nginx_list()
-{
-  trace_filter nginx || set -o xtrace
-  local line header
-  typeset -a master_list worker_list
-  header="$(ps auxww | head -1)"
-
-  (( master_pid > 0 )) || succeed "No Nginx master processes was found."
-
-  while read -r line
-  do
-    if [[ "$line" =~ nginx ]]
-    then
-      if [[ "$line" =~ master ]]
-      then
-        master_list+=("${line}")
-      elif [[ "$line" =~ worker ]]
-      then
-        worker_list+=("${line}")
-      fi
-    fi
-  done < <(ps auxww | awk '/[n]ginx/')
-
-  echo "$header"
-
-  for line in "${master_list[@]}"
-  do
-    echo "${line}"
-  done
-
-  for line in "${worker_list[@]}"
-  do
-    echo "${line}"
-  done
-}
-
-nginx_configure_system_etc()
-{
-  trace_filter nginx || set -o xtrace
-
-  if ! (( force_flag )) && path exists "/etc/nginx"
-  then
-    error "/etc/nginx exists; To force re-configure use the 'force'"
-  fi
-
-  if path exists /etc/nginx
-  then
-    path move \
-      from /etc/nginx \
-      to /etc/nginx.${timestamp}
-  fi
-
-  files link symbolic \
-    from "${install_path}/etc/nginx" \
-    to /etc/nginx
-}
-
-nginx_conf_edit()
-{
-  trace_filter nginx || set -o xtrace
-  if command exists vim
-  then
-    ${EDITOR:=vim}
-  else
-    ${EDITOR:=vi}
-  fi
-  export EDITOR
-
-  ${EDITOR} "${service_config_path}/nginx.conf"
-}
-
-nginx_server_conf_edit()
-{
-  trace_filter nginx || set -o xtrace
-  if command exists vim
-  then
-    ${EDITOR:=vim}
-  else
-    ${EDITOR:=vi}
-  fi
-
-  ${EDITOR} "${service_config_path}/servers/${project:-"${extension_args[0]}"}.conf"
-}
-
-nginx_server_new_cli()
-{
-  trace_filter nginx || set -o xtrace
-  if variables are empty project
-  then
-    array shift extension_args project
-  fi
-
-  true ${project:=$1}
-
-  if variables are empty project
-  then
-    fail "$FUNCNAME: project name must be given."
-  fi
-
-  nginx_cli
-}
-
-nginx_server_new()
-{
-  trace_filter nginx || set -o xtrace
-  local domain="${project}"
-
-  if ! templates exist "nginx/server.conf"
-  then
-    fail "$FUNCNAME: $extension_templates_path/server.conf template is missing."
-  fi
-
-  paths create "${service_config_path}/servers"
-
-  # If this is running as root, ensure that Nginx can read from the
-  # application directory.
-  if user is root && path exists "/home/${project}"
-  then
-    path chmod 'g+rx' recursive "/home/${project}"
-  fi
-
-  project_config="${service_config_path}/servers/${project}.conf"
-
-  if (( force_flag == 1 )) && file_exists "${project_config}"
-  then
-    remove_file "${project_config}"
-  fi
-
-  if ! files exist "${project_config}"
-  then
-    templates install "nginx/server.conf" \
-      to "${project_config}"
-  fi
-
-  if ! [[ "${domain}" =~ "." ]]
-  then
-    domain="${domain}.com"
-  fi
-
-  if array is empty domains
-  then
-    domains=("${domain}" "*.${domain}")
-  fi
-
-  if files exist "${project_config}"
-  then
-    templates seed "${project_config}" \
-      modules_path "${modules_path}" \
-      service "${service}" \
-      project "${project}" \
-      domain "${domain}" \
-      domains "${domains[*]}" \
-      project_path ${project_path:="/home/${project_user:-${project}}"} \
-      project_user "${project_user}" \
-      service_config_path "${service_config_path}" \
-      service_pid_file "${service_pid_file}" \
-      service_log_path "${service_log_path}"
-  fi
-}
-
-nginx_restart()
-{
-  trace_filter nginx || set -o xtrace
-  if (( master_pid > 0 ))
-  then
-    kill -HUP $master_pid
-  else
-    service restart
-  fi
-}
-
-nginx_config_check()
-{
-  trace_filter nginx || set -o xtrace
-  "${service_binary}" -t -c "${service_config_path}/nginx.conf"
-}
-

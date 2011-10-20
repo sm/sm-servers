@@ -1,0 +1,9 @@
+#!/bin/sh
+
+trace_filter nginx || set -o xtrace
+if (( master_pid > 0 ))
+then
+  kill -HUP $master_pid
+else
+  service restart
+fi
