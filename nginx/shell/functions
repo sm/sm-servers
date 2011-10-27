@@ -12,10 +12,8 @@ nginx_cli()
 
   service initialize
 
-  if variables are empty domains
-  then
-    domains=()
-  fi
+  if variable is empty domains
+  then domains=() ; fi
 
   for (( index=0 ; index < $_count ; index++ ))
   do
@@ -25,7 +23,7 @@ nginx_cli()
       (domain)
         _domain="${_package_args[$((++index))]}"
         _domain="${_domain//,/ }"
-        if variables are empty _domain
+        if variable is empty _domain
         then
           error "$FUNCNAME: a domain must follow keyword 'domain'"
         fi
@@ -39,21 +37,21 @@ nginx_cli()
         ;;
       (project)
         project="${_package_args[$((++index))]}"
-        if variables are empty project
+        if variable is empty project
         then
           error "$FUNCNAME: a project name must follow keyword 'project'"
         fi
         ;;
       (user)
         project_user="${_package_args[$((++index))]}"
-        if variables are empty project_user
+        if variable is empty project_user
         then
           error "$FUNCNAME: a project user name must follow keyword 'user'"
         fi
         ;;
       (path)
         project_path="${_package_args[$((++index))]}"
-        if variables are empty project_path
+        if variable is empty project_path
         then
           error "$FUNCNAME: a project path name must follow keyword 'path'"
         fi
@@ -85,9 +83,9 @@ nginx_server_new_cli()
 
   true ${project:=$1}
 
-  if variables are empty project
+  if variable is empty project
   then
-    fail "$FUNCNAME: project name must be given."
+    log fail "$FUNCNAME: project name must be given."
   fi
 
   nginx_cli
@@ -140,7 +138,8 @@ nginx_initialize()
 
   config_dirs=( conf servers users ssl )
   nginx_dirs=( log spool run lock etc/nginx tmp )
-  nginx_files=( fastcgi.conf fastcgi.conf.default fastcgi_params
+  nginx_files=(
+  fastcgi.conf fastcgi.conf.default fastcgi_params
   fastcgi_params.default koi-utf koi-win mime.types mime.types.default
   nginx.conf.default scgi_params scgi_params.default uwsgi_params
   uwsgi_params.default win-utf
@@ -150,6 +149,111 @@ nginx_initialize()
 
   master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
   service_flags=( -c "${service_config_path}/nginx.conf" )
+}
+
+# Hook after installation of nginx package
+nginx_postinstall()
+{
+  trace_filter nginx || set -o xtrace
+
+  if file exists "nginx.conf"
+  then
+    file move "nginx.conf" \
+      to "${install_path}/etc/nginx/conf/nginx.conf.default" \
+      from "${install_path}/etc/nginx"
+  fi
+
+  path enter "${install_path}"
+  paths create "${nginx_dirs[@]}"
+
+  path enter "${install_path}/etc/nginx"
+  paths create "${config_dirs[@]}"
+
+  # Cleanup default nginx install messy directory.
+  file move "${nginx_files[@]}" \
+    to "${install_path}/etc/nginx/conf" \
+    from "${install_path}/etc/nginx"
+
+  paths create "${install_path}/config" "${install_path}/etc/nginx/servers"
+}
+
+# Hook after activation of nginx package
+nginx_postactivate()
+{
+  trace_filter nginx || set -o xtrace
+  user is root || return 0
+
+  if (( ${force_flag:=0} )) &&
+    paths exists "${service_config_path}"
+  then
+    paths move \
+      from "${service_config_path}" \
+      to "${service_config_path}.${timestamp}"
+  fi
+
+  service setup # create user, etc... then calls nginx_service_setup
+
+  if ! file exists "${service_config_path}/nginx.conf"
+  then
+    file link symbolic force \
+      from "${install_path}/etc/nginx" \
+      to "${service_config_path}"
+
+    paths enter "${service_config_path}"
+
+    files remove "${nginx_files[@]}"
+  fi
+
+  files link symbolic force \
+    from "${install_path}/sbin/nginx" \
+    to "${active_path}/sbin/nginx"
+}
+
+nginx_service_setup()
+{
+  trace_filter nginx || set -o xtrace
+  typeset templates template
+
+  template install "nginx/nginx.conf" \
+    to "${install_path}/etc/nginx/nginx.conf" \
+    mode 0644 \
+    owner "${service_user}" \
+    with \
+    modules_path "${modules_path}" \
+    service "${service}" \
+    service_user "${service_user}" \
+    service_config_path "${service_config_path}" \
+    service_pid_file "${service_pid_file}" \
+    service_log_path "${service_log_path}"
+
+  paths create "${install_path}/etc/nginx/health/"
+
+  templates install "nginx/nginx.health" \
+    to "${install_path}/etc/nginx/health/nginx.conf" \
+    mode 0644 owner "${service_user}"
+
+  templates install "nginx/nginx" \
+    to "${install_path}/etc/nginx" \
+    mode 0755 owner "${service_user}"
+
+  templates=( "mime.types" "proxy.conf" )
+
+  for template in "${templates[@]}"
+  do
+    templates install "nginx/${template}" \
+      to "${install_path}/etc/nginx/conf/${template}" \
+      mode 0644 \
+      owner "${service_user}"
+  done
+
+  path enter "${install_path}"
+
+  file replace \
+    regexp "^user .*;$" \
+    with "# No user line for non-root installs" \
+    in "${install_path}/etc/nginx/nginx.conf"
+
+  paths chown "${service_user}" recursive "${nginx_dirs[@]}" "etc/nginx"
 }
 
 nginx_os_dependencies_install()
@@ -186,106 +290,3 @@ nginx_os_dependencies_install()
   echo
 }
 
-# Hook after installation of nginx package
-nginx_postinstall()
-{
-  trace_filter nginx || set -o xtrace
-
-  if files exist "nginx.conf"
-  then
-    file move "nginx.conf" \
-      to "${install_path}/etc/nginx/conf/nginx.conf.default" \
-      from "${install_path}/etc/nginx"
-  fi
-
-  paths enter "${install_path}"
-  paths create "${nginx_dirs[@]}"
-
-  paths enter "${install_path}/etc/nginx"
-  paths create "${config_dirs[@]}"
-
-  # Cleanup default nginx install messy directory.
-  files move "${nginx_files[@]}" \
-    to "${install_path}/etc/nginx/conf" \
-    from "${install_path}/etc/nginx"
-
-  paths create "${install_path}/config" "${install_path}/etc/nginx/servers"
-}
-
-# Hook after activation of nginx package
-nginx_postactivate()
-{
-  trace_filter nginx || set -o xtrace
-  user is root || return 0
-
-  if (( ${force_flag:=0} )) &&
-    paths exists "${service_config_path}"
-  then
-    paths move \
-      from "${service_config_path}" \
-      to "${service_config_path}.${timestamp}"
-  fi
-
-  service setup # create user, etc... then calls nginx_service_setup
-
-  if ! files exist "${service_config_path}/nginx.conf"
-  then
-    file link symbolic force \
-      from "${install_path}/etc/nginx" \
-      to "${service_config_path}"
-
-    paths enter "${service_config_path}"
-
-    files remove "${nginx_files[@]}"
-  fi
-
-  files link symbolic force \
-    from "${install_path}/sbin/nginx" \
-    to "${active_path}/sbin/nginx"
-}
-
-nginx_service_setup()
-{
-  trace_filter nginx || set -o xtrace
-  typeset templates template
-
-  template install "nginx/nginx.conf" \
-    to "${install_path}/etc/nginx/nginx.conf" \
-    mode 0644 owner "${service_user}"
-
-  template seed "${install_path}/etc/nginx/nginx.conf" \
-    modules_path "${modules_path}" \
-    service "${service}" \
-    service_user "${service_user}" \
-    service_config_path "${service_config_path}" \
-    service_pid_file "${service_pid_file}" \
-    service_log_path "${service_log_path}"
-
-  paths create "${install_path}/etc/nginx/health/"
-
-  templates install "nginx/nginx.health" \
-    to "${install_path}/etc/nginx/health/nginx.conf" \
-    mode 0644 owner "${service_user}"
-
-  templates install "nginx/nginx" \
-    to "${install_path}/etc/nginx" \
-    mode 0755 owner "${service_user}"
-
-  templates=( "mime.types" "proxy.conf" )
-
-  for template in "${templates[@]}"
-  do
-    templates install "nginx/${template}" \
-      to "${install_path}/etc/nginx/conf/${template}" \
-      mode 0644 owner "${service_user}"
-  done
-
-  paths enter "${install_path}"
-
-  files replace \
-    regexp "^user .*;$" \
-    with "# No user line for non-root installs" \
-    in "${install_path}/etc/nginx/nginx.conf"
-
-  paths chown "${service_user}" recursive "${nginx_dirs[@]}" "etc/nginx"
-}

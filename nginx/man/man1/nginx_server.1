@@ -1,0 +1,41 @@
+.\"   $Id$
+.\"
+.\"   Man page for the bdsm project.
+.\"
+.\"   $Log$
+.\"
+
+.TH SM 1 "2011 October 27" "SM Framework"
+
+.SH SYNOPSIS
+.B sm
+nginx server {action} {action-params}
+
+.SH DESCRIPTION
+SM Framework Open Source Nginx Extension
+
+.TP 13
+.B list
+List all servers in the nginx configuration servers/ path.
+
+.SH Actions
+.TP 13
+.B new {name}
+Create a new server called {name} in the nginx configuration servers/ path.
+
+.TP 13
+.B edit {name}
+Edit a server called {name} in the nginx configuration servers/ path.
+
+.TP 13
+.B enable {name}
+Enable a server called {name} in the nginx configuration servers/ path.
+
+.TP 13
+.B disable {name}
+Disable a server called {name} in the nginx configuration servers/ path.
+
+.TP 13
+.B man server
+Display this man page
+

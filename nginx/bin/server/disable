@@ -9,19 +9,19 @@ true ${project:="${extension_args[0]:-$1}"}
 
 if variable is empty project
 then
-  fail "project must be specified for 'nginx server'"
+  log fail "project must be specified for 'nginx server'"
 fi
 
 if files exist "${service_config_path}/servers/$project.conf"
 then
-  files move \
+  file move \
     from "${service_config_path}/servers/$project.conf" \
     to "${service_config_path}/servers/$project.conf.disabled"
 else
-  if ! files exist "${service_config_path}/servers/$project.conf.disabled"
+  if ! file exists "${service_config_path}/servers/$project.conf.disabled"
   then
-    fail "INFO: Cannot disable '${project}'"\
-    "as ${service_config_path}/servers/$project.conf does not exist."
+    log fail "INFO: Cannot disable '${project}'"\
+      "as ${service_config_path}/servers/$project.conf does not exist."
   fi
   succeed "$project.conf is disabled."
 fi
