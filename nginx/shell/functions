@@ -181,12 +181,16 @@ nginx_postinstall()
 nginx_postactivate()
 {
   trace_filter nginx || set -o xtrace
-  user is root || return 0
+
+  if user is not root
+  then
+    return 0
+  fi
 
   if (( ${force_flag:=0} )) &&
-    paths exists "${service_config_path}"
+    path exists "${service_config_path}"
   then
-    paths move \
+    path move \
       from "${service_config_path}" \
       to "${service_config_path}.${timestamp}"
   fi
@@ -199,7 +203,7 @@ nginx_postactivate()
       from "${install_path}/etc/nginx" \
       to "${service_config_path}"
 
-    paths enter "${service_config_path}"
+    path enter "${service_config_path}"
 
     files remove "${nginx_files[@]}"
   fi
@@ -253,7 +257,8 @@ nginx_service_setup()
     with "# No user line for non-root installs" \
     in "${install_path}/etc/nginx/nginx.conf"
 
-  paths chown "${service_user}" recursive "${nginx_dirs[@]}" "etc/nginx"
+  paths chown "${service_user}" recursively \
+    "${nginx_dirs[@]}" "etc/nginx"
 }
 
 nginx_os_dependencies_install()

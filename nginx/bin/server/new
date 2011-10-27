@@ -3,6 +3,9 @@
 trace_filter nginx || set -o xtrace
 local domain="${project}"
 
+typeset -g project_config domain
+typeset -ga domains
+
 if ! template exists "nginx/server.conf"
 then
   fail "$FUNCNAME: $extension_templates_path/server.conf template is missing."
@@ -34,11 +37,11 @@ then
   domains=("${domain}" "*.${domain}")
 fi
 
-
 if ! files exist "${project_config}"
 then
   templates install "nginx/server.conf" \
-    to "${project_config}" with \
+    to "${project_config}" \
+    with \
     modules_path "${modules_path}" \
     service "${service}" \
     project "${project}" \
