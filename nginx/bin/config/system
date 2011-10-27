@@ -15,5 +15,5 @@ then
 fi
 
 files link symbolic \
-  from "${install_path}/etc/nginx" \
+  from "${active_path}/etc/nginx" \
   to /etc/nginx
