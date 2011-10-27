@@ -97,6 +97,7 @@ nginx_preconfigure()
   trace_filter nginx || set -o xtrace
   typeset -ga configure_flags config_dirs nginx_dirs nginx_files
   typeset -g master_pid service_binary
+
   # TODO: Allow overriding of these parameters via cli
   # These defaults may be overridden also by the nginx configuration files.
   configure_flags=(
@@ -149,6 +150,7 @@ nginx_initialize()
 
   master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
   service_flags=( -c "${service_config_path}/nginx.conf" )
+  service_binary="${install_path}/sbin/nginx"
 }
 
 # Hook after installation of nginx package
@@ -244,7 +246,7 @@ nginx_service_setup()
 
   for template in "${templates[@]}"
   do
-    templates install "nginx/${template}" \
+    template install "nginx/${template}" \
       to "${install_path}/etc/nginx/conf/${template}" \
       mode 0644 \
       owner "${service_user}"
