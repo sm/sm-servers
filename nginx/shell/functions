@@ -238,9 +238,10 @@ nginx_service_setup()
     to "${install_path}/etc/nginx/health/nginx.conf" \
     mode 0644 owner "${service_user}"
 
-  templates install "nginx/nginx" \
-    to "${install_path}/etc/nginx" \
-    mode 0755 owner "${service_user}"
+  # NOTE: This was the init.d script originally
+  # templates install "nginx/init.d" \
+  # to "${install_path}/etc/init.d/nginx" \
+  #  mode 0755 owner "${service_user}"
 
   templates=( "mime.types" "proxy.conf" )
 
