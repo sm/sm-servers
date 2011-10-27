@@ -150,7 +150,6 @@ nginx_initialize()
 
   master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
   service_flags=( -c "${service_config_path}/nginx.conf" )
-  service_binary="${install_path}/sbin/nginx"
 }
 
 # Hook after installation of nginx package
