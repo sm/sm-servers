@@ -78,7 +78,7 @@ nginx_server_new_cli()
   trace_filter nginx || set -o xtrace
   if variable is empty project
   then
-    array shift extension_args project
+    array shift extension_args variable project
   fi
 
   true ${project:=$1}
