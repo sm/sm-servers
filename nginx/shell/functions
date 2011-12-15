@@ -171,7 +171,7 @@ nginx_postinstall()
   paths create "${config_dirs[@]}"
 
   # Cleanup default nginx install messy directory.
-  file move "${nginx_files[@]}" \
+  files move "${nginx_files[@]}" \
     to "${install_path}/etc/nginx/conf" \
     from "${install_path}/etc/nginx"
 
@@ -209,7 +209,7 @@ nginx_postactivate()
     files remove "${nginx_files[@]}"
   fi
 
-  files link symbolic force \
+  file link symbolic force \
     from "${install_path}/sbin/nginx" \
     to "${active_path}/sbin/nginx"
 }
