@@ -276,7 +276,7 @@ nginx_os_dependencies_install()
 
     elif command exists apt-get
     then
-      apt-get install build-essential openssl curl zlib1g zlib1g-dev libssl-dev pcre pcre-dev
+      apt-get install build-essential openssl curl zlib1g zlib1g-dev libssl-dev libpcre3-dev
 
     elif command exists yum
     then
