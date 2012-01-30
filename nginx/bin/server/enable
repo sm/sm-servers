@@ -9,10 +9,10 @@ then
   log fail "project must be specified for 'nginx project'"
 fi
 
-if files exist "${service_config_path}/servers/$project.conf.disbled"
+if files exist "${service_config_path}/servers/$project.conf.disabled"
 then
   file move \
-    from "${service_config_path}/servers/$project.conf.disbled" \
+    from "${service_config_path}/servers/$project.conf.disabled" \
     to "${service_config_path}/servers/$project.conf"
 else
   if ! files exist "${service_config_path}/servers/$project.conf"
