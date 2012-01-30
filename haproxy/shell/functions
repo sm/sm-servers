@@ -2,7 +2,7 @@
 
 haproxy_initialize()
 {
-  package_dependencies=( pcre )
+  package_dependencies=( ) # pcre
 
   package define \
     base_url "http://haproxy.1wt.eu/download/${package_version%.*}/src/" \
@@ -65,7 +65,7 @@ haproxy_configure()
   fi
 
   make_install_flags=( install ${make_flags[@]})
-  make_flags+=( -j$(os_cpu_count) )
+  make_flags+=( -j$(os cpu count) )
 
   make "${make_flags[@]}"
 }
