@@ -4,7 +4,7 @@ trace_filter nginx || set -o xtrace
 
 if ! (( force_flag )) && path exists "/etc/nginx"
 then
-  error "/etc/nginx exists; To force re-configure use the 'force'"
+  log error "/etc/nginx exists; To force re-configure use the 'force'"
 fi
 
 if path exists /etc/nginx
