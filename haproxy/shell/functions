@@ -13,6 +13,7 @@ haproxy_initialize()
   service_restart_flags+=( -p "${service_pid_file}" )
   service_stop_flags+=( )
 
+  typeset -g service_run_as_root_flag
   service_run_as_root_flag=1
 }
 
