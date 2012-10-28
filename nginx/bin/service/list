@@ -3,6 +3,7 @@
 trace_filter nginx || set -o xtrace
 local line header
 typeset -a master_list worker_list
+
 header="$(ps auxww | head -1)"
 
 (( master_pid > 0 )) || succeed "No Nginx master processes was found."
