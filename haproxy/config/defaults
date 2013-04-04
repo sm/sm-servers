@@ -1,3 +1,4 @@
-version=1.4.20
+version=1.4.23
+dev_version=1.5-dev18
 archive_format=tar.gz
 website=http://haproxy.1wt.eu
