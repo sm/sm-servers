@@ -115,6 +115,7 @@ nginx_preconfigure()
   --with-ipv6 
   --with-http_ssl_module
   --with-http_stub_status_module
+  --with-http_spdy_module
   )
 
   # if package is active pcre
