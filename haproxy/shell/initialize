@@ -1,0 +1,26 @@
+#!/bin/sh
+
+config read file "defaults" key "version" from haproxy prefix package
+config read file "defaults" key "archive_format" from haproxy
+
+case ${package_version} in
+    (*dev*)
+        package_base_url="http://haproxy.1wt.eu/download/1.5/src/devel/"
+        package_url="http://haproxy.1wt.eu/download/1.5/src/devel/haproxy-${package_version}.${archive_format}"
+        ;;
+    (*)
+        package_base_url="http://haproxy.1wt.eu/download/${package_version%\.*}/src/"
+        ;;
+esac
+
+package_docs_url="http://haproxy.1wt.eu/download/${package_version%\.*}/doc/configuration.txt"
+
+service_flags+=( -f "/etc/haproxy/haproxy.cfg" )
+service_start_flags+=( -p "${service_pid_file}" -D )
+service_restart_flags+=( -p "${service_pid_file}" )
+service_stop_flags+=( )
+
+typeset -g service_run_as_root_flag
+
+service_run_as_root_flag=1
+
