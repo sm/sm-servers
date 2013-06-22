@@ -1,0 +1,13 @@
+#!/bin/sh
+
+typeset result
+if ! ${sm_path}/bin/sm haproxy check
+then 
+    result=$?
+    echo "Cannot start, fix configuration first."
+    exit ${result}
+fi
+
+${active_path}/bin/haproxy -D -f /etc/haproxy/haproxy.cfg -C /var/lib/haproxy
+exit $?
+

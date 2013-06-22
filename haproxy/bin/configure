@@ -1,0 +1,12 @@
+#!/bin/sh
+
+user create unless exists \
+      name "haproxy" home "/var/lib/haproxy" shell "/bin/sh" group "haproxy"
+
+for _path in /etc/haproxy /var/run/haproxy /var/db/haproxy /var/lib/haproxy
+do path create ${_path} owner haproxy:haproxy
+done
+
+template install "haproxy/haproxy.cfg" \
+    to "/etc/haproxy/haproxy.cfg" owner haproxy:haproxy
+

@@ -24,3 +24,12 @@ typeset -g service_run_as_root_flag
 
 service_run_as_root_flag=1
 
+typeset _pid _pidfile
+
+_pidfile="/var/run/haproxy/haproxy.pid"
+
+if [[ -s  ${_pidfile} ]]
+then _pid=$(cat ${_pidfile} )
+else _pid=0
+fi
+

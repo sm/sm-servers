@@ -1,0 +1,14 @@
+#!/bin/sh
+
+typeset result
+if ! ${sm_path}/bin/sm haproxy check
+then 
+    result=$?
+    echo "Cannot restart, fix configuration first."
+    return ${result}
+fi
+
+${sm_path}/bin/sm haproxy stop
+
+exec ${sm_path}/bin/sm haproxy start
+
