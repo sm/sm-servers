@@ -11,7 +11,7 @@ done
 
 template install "haproxy/haproxy.cfg" \
     to "/etc/haproxy/haproxy.cfg" \
-    owner haproxy:haproxy mode 0644
+    owner haproxy:haproxy mode 0600
 
 template install "haproxy/logrotate.haproxy.conf" \
     to "/etc/logrotate.d/haproxy.conf" \
@@ -30,7 +30,9 @@ then
     if ! file contains regexp '^$UDPServerRun 514' "/etc/rsyslog.conf"
     then file write append string '\$UDPServerRun 514' to  "/etc/rsyslog.conf"
     fi
-    restart rsyslog || log "WARNING: There was an error restarting rsyslog."
+
+    # Tell *syslogd to reload configuration.
+    pkill -HUP syslog ||  log "WARNING: There was an error restarting rsyslog."
 fi
 
 
