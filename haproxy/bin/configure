@@ -1,5 +1,7 @@
 #!/bin/sh
 
+user is root || log error "haproxy configure should be run as root."
+
 user create unless exists \
       name "haproxy" home "/var/lib/haproxy" shell "/bin/sh" group "haproxy"
 
@@ -8,5 +10,75 @@ do path create ${_path} owner haproxy:haproxy
 done
 
 template install "haproxy/haproxy.cfg" \
-    to "/etc/haproxy/haproxy.cfg" owner haproxy:haproxy
+    to "/etc/haproxy/haproxy.cfg" \
+    owner haproxy:haproxy mode 0644
+
+template install "haproxy/logrotate.haproxy.conf" \
+    to "/etc/logrotate.d/haproxy.conf" \
+    owner haproxy:haproxy mode 0644
+
+template install "haproxy/rsyslog.haproxy.conf" \
+    to "/etc/rsyslog.d/30-haproxy.conf" \
+    owner haproxy:haproxy mode 0644
+
+if file exists "/etc/rsyslog.conf"
+then
+    if ! file contains regexp '^$ModLoad imudp' "/etc/rsyslog.conf"
+    then file write append string '\$ModLoad imudp' to  "/etc/rsyslog.conf"
+    fi
+
+    if ! file contains regexp '^$UDPServerRun 514' "/etc/rsyslog.conf"
+    then file write append string '\$UDPServerRun 514' to  "/etc/rsyslog.conf"
+    fi
+    restart rsyslog || log "WARNING: There was an error restarting rsyslog."
+fi
+
+
+if command exists iptables
+then
+    if ! file contains regexp '--set-mark 1' "/etc/rc.local"
+    then
+        echo "
+You can now configure iptables for haproxy HA solutions:  
+(Don't forget to ensure it will persist across reboots)
+
+# HAProxy
+iptables -t mangle -N DIVERT
+iptables -t mangle -A PREROUTING -p tcp -m socket -j DIVERT
+iptables -t mangle -A DIVERT -j MARK --set-mark 1
+iptables -t mangle -A DIVERT -j ACCEPT
+ip rule add fwmark 1 lookup 100
+ip route add local 0.0.0.0/0 dev lo table 100
+
+"
+    fi
+fi
+
+echo "
+= Further Configuration Possibilities 
+
+If you have an HAProxy pair running with heartbeat then you should have an 
+extenal floating virtual IP (VIP) and an internal floating IP (FIP) for the 
+default gateway. Then for internal servers you may also need an additional 
+IPTables Rule to masquerade internal traffic on the VIP, eg:
+
+    iptables -t nat -A POSTROUTING -s 192.168.1.0/255.255.255.0 -j MASQUERADE
+
+Many thanks to 'Malcom Turnbull' for this information in a blog comment.
+
+You might also consider configuring forwarding and redirects in
+
+/proc/sys/net/ipv4:
+
+    echo 1 > /proc/sys/net/ipv4/conf/all/forwarding
+    echo 1 > /proc/sys/net/ipv4/conf/all/send_redirects
+    echo 1 > /proc/sys/net/ipv4/conf/eth0/send_redirects
+
+You can also consider adjusting the max fd for the haproxy system:
+
+    echo '*       soft    nofile  1024' >> /etc/security/limits.conf
+    echo '*       hard    nofile  65535' >> /etc/security/limits.conf
+    echo 65535 > /proc/sys/fs/file-max
+
+"
 
