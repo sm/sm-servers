@@ -1,11 +1,9 @@
 #!/bin/sh
 
-if command_exists vim
-then
-  ${EDITOR:=vim}
-else
-  ${EDITOR:=vi}
+if command exists vim
+then ${EDITOR:=vim}
+else ${EDITOR:=vi}
 fi
 
-${EDITOR} "${service_config_path}/${extension}.conf"
+${EDITOR} ${configfile}
 

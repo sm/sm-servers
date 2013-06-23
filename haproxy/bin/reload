@@ -1,0 +1,15 @@
+#!/bin/sh
+
+typeset result
+if ! ${sm_path}/bin/sm haproxy check
+then 
+    result=$?
+    echo "Cannot restart, fix configuration first."
+    return ${result}
+fi
+
+${active_path}/bin/haproxy \
+    -f ${configfile} -p ${pidfile} -D -C /var/lib/haproxy -sf ${_pid}
+
+exit $?
+

@@ -8,6 +8,6 @@ then
     exit ${result}
 fi
 
-${active_path}/bin/haproxy -D -f /etc/haproxy/haproxy.cfg -C /var/lib/haproxy
+${active_path}/bin/haproxy -D -f ${configfile} -C /var/lib/haproxy
 exit $?
 

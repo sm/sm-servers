@@ -1,7 +1,7 @@
 #!/bin/sh
 
 typeset -g service_run_as_root_flag 
-typeset _pid _pidfile
+typeset _pid pidfile configfile
 
 config read file "defaults" key "version" from haproxy prefix package
 config read file "defaults" key "archive_format" from haproxy
@@ -25,10 +25,12 @@ service_stop_flags+=( )
 
 service_run_as_root_flag=1
 
-_pidfile="/var/run/haproxy/haproxy.pid"
+pidfile="/var/run/haproxy/haproxy.pid"
 
-if [[ -s  ${_pidfile} ]]
-then _pid=$(cat ${_pidfile} )
+if [[ -s  ${pidfile} ]]
+then _pid=$(cat ${pidfile} )
 else _pid=0
 fi
+
+configfile="/etc/haproxy/haproxy.cfg"
 

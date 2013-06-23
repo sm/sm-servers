@@ -3,7 +3,7 @@
 if (( ${_pid} > 0 ))
 then kill -USR1 ${_pid}
     if (($? == 0 ))
-    then rm -f /var/lock/subsys/haproxy /var/run/haproxy/haproxy.pid
+    then rm -f ${pidfile}
     fi
 else
     echo "It appears that haproxy is no longer running (no pidfile)."
