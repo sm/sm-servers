@@ -54,8 +54,9 @@ haproxy_configure()
     )
   fi
 
-  typeset -a make_install_flags
+  typeset -ga make_install_flags
   make_install_flags=( install ${make_flags[@]} )
+
   make_flags+=( -j$(os cpu count) )
 
   make ${make_flags[@]} > build.log 2>&1 || error \
