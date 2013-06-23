@@ -48,10 +48,12 @@ haproxy_configure()
     )
   fi
 
-  make_install_flags=( install ${make_flags[@]})
+  typeset -a make_install_flags
+  make_install_flags=( install ${make_flags[@]} )
   make_flags+=( -j$(os cpu count) )
 
-  make "${make_flags[@]}"
+  make "${make_flags[@]}" > build.log 2>&1 || error \
+      "Compilation of ${package_name} ${package_version} failed! " "$PWD/build.log"
 }
 
 haproxy_postinstall()
@@ -66,7 +68,7 @@ haproxy_postinstall()
 
   if command exists iptables
   then
-      if ! file contains "/etc/rc.local" '--set-mark 1'
+      if ! file contains regexp '--set-mark 1' "/etc/rc.local"
       then
           echo "You can append the following iptables config to /etc/rc.local:"\
               "\n# HAProxy"\
