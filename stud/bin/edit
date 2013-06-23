@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if command exists vim
+then ${EDITOR:=vim}
+else ${EDITOR:=vi}
+fi
+
+${EDITOR} ${configfile}
+

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+typeset result
+if ! ${sm_path}/bin/sm stud check
+then 
+    result=$?
+    echo "Cannot start, fix configuration first."
+    exit ${result}
+fi
+
+${active_path}/bin/stud --config=${configfile}
+exit $?
+

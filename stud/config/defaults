@@ -1,0 +1,3 @@
+version=0.3.0
+archive_format=zip
+website=https://github.com/bumptech/stud/tree/ssl-error-queue-fix

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+user is root || log error "stud configure should be run as root."
+
+user create unless exists \
+      name "stud" home "/var/lib/stud" shell "/bin/sh" group "stud"
+
+for _path in /etc/stud /var/run/stud /var/db/stud /var/lib/stud
+do path create ${_path} owner stud:stud
+done
+
+template install "stud/stud.cfg" \
+    to "/etc/stud/stud.cfg" \
+    owner stud:stud mode 0600
+
+template install "stud/logrotate.stud.conf" \
+    to "/etc/logrotate.d/stud.conf" \
+    owner stud:stud mode 0644
+

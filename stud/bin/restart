@@ -1,0 +1,14 @@
+#!/bin/sh
+
+typeset result
+if ! ${sm_path}/bin/sm stud check
+then 
+    result=$?
+    echo "Cannot restart, fix configuration first."
+    return ${result}
+fi
+
+${sm_path}/bin/sm stud stop
+
+exec ${sm_path}/bin/sm stud start
+

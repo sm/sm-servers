@@ -1,0 +1,20 @@
+#!/bin/sh
+
+typeset -g service_run_as_root_flag 
+typeset _pid pidfile configfile
+
+config read file "defaults" key "version" from stud prefix package
+config read file "defaults" key "archive_format" from stud
+
+pakcage_url="https://github.com/bumptech/stud/archive/master.zip"
+package_file_name="master.zip"
+package_docs_url="https://github.com/bumptech/stud/blob/master/README.md"
+
+pidfile="/var/run/stud/stud.pid"
+configfile="/etc/stud/stud.conf"
+
+_pid=$(ps auxww | awk '/[s]tud/{print $2}')
+
+[[ -n  ${_pid} ]] || _pid=0
+
+
