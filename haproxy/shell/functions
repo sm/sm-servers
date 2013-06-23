@@ -56,72 +56,48 @@ haproxy_configure()
 
 haproxy_postinstall()
 {
-  if user is root
+  if ! user is root
   then
-    if os is linux
-    then
-      if command_exists iptables
-      then
-        if ! file_contains "/etc/rc.local" '--set-mark 1'
-        then
-          echo "You can append the following iptables config to /etc/rc.local:"\
-          "\n# HAProxy"\
-          "\niptables -t mangle -N DIVERT"\
-          "\niptables -t mangle -A PREROUTING -p tcp -m socket -j DIVERT"\
-          "\niptables -t mangle -A DIVERT -j MARK --set-mark 1"\
-          "\niptables -t mangle -A DIVERT -j ACCEPT"\
-          "\nip rule add fwmark 1 lookup 100"\
-          "\nip route add local 0.0.0.0/0 dev lo table 100"\
-          "\n# HAProxy"
-        fi
-      else
-        true # No warning as we are not actually doing anything.
-        # warn "The iptables command was not found, skipping iptables configuration."
-      fi
+      warn "Skipping iptables configuration as the user is not running as root."
+      return 0
+  fi
 
-      echo "If you have an HAProxy pair running with heartbeat then you should"\
+  os is linux || return 0
+
+  if command exists iptables
+  then
+      if ! file contains "/etc/rc.local" '--set-mark 1'
+      then
+          echo "You can append the following iptables config to /etc/rc.local:"\
+              "\n# HAProxy"\
+              "\niptables -t mangle -N DIVERT"\
+              "\niptables -t mangle -A PREROUTING -p tcp -m socket -j DIVERT"\
+              "\niptables -t mangle -A DIVERT -j MARK --set-mark 1"\
+              "\niptables -t mangle -A DIVERT -j ACCEPT"\
+              "\nip rule add fwmark 1 lookup 100"\
+              "\nip route add local 0.0.0.0/0 dev lo table 100"\
+              "\n# HAProxy"
+      fi
+  else
+      true # No warning as we are not actually doing anything.
+      # "The iptables command was not found, skipping iptables configuration."
+  fi
+
+  echo "If you have an HAProxy pair running with heartbeat then you should"\
       " have an extenal floating virtual IP (VIP) and an internal floating IP"\
       "(FIP) for the default gateway. Then for internal servers you may also need"\
       " an additional IPTables Rule to masquerade internal traffic on the VIP, eg.
-      iptables -t nat -A POSTROUTING -s 192.168.1.0/255.255.255.0 -j MASQUERADE\n"\
+  iptables -t nat -A POSTROUTING -s 192.168.1.0/255.255.255.0 -j MASQUERADE\n"\
       "Many thanks to 'Malcom Turnbull' for this information in a blog comment."
-    else
-      warn "Skipping iptables configuration as the user is not running as root."
-    fi
 
-    echo "You might also consider configuring forwarding and redirects in"\
+  echo "You might also consider configuring forwarding and redirects in"\
       "/proc/sys/net/ipv4:"\
       "\necho 1 > /proc/sys/net/ipv4/conf/all/forwarding"\
       "\necho 1 > /proc/sys/net/ipv4/conf/all/send_redirects"\
       "\necho 1 > /proc/sys/net/ipv4/conf/eth0/send_redirects"
 
-    echo "Consider adjusting the max fd for the haproxy system:"\
-         "\necho '*       soft    nofile  1024' >> /etc/security/limits.conf"\
-         "\necho '*       hard    nofile  65535' >> /etc/security/limits.conf"\
-         "\necho 65535 > /proc/sys/fs/file-max"
-
-    if file_exists "/etc/haproxy/haproxy.cfg"
-    then
-      echo "Skipping installation of haproxy.cfg as /etc/haproxy/haproxy.cfg"\
-        "already exists"
-    else
-      if template_exists "haproxy/haproxy.cfg"
-      then
-        install_template "haproxy/haproxy.cfg" to "/etc/haproxy/haproxy.cfg" mode 0644
-      else
-        warn "Not installing the haproxy.cfg template as it does not exist..."\
-          "This indicates something is wrong in the extension."
-      fi
-    fi
-
-    if file_exists"/etc/haproxy/haproxy.cfg"
-    then
-      seed_template "/etc/haproxy/haproxy.cfg" \
-        service_user "${service_user}"
-    else
-      warn "Not seeding temlpate /etc/haproxy/haproxy.cfg as the file is missing"
-    fi
-
-    # TODO: User config...???
-  fi
+  echo "Consider adjusting the max fd for the haproxy system:"\
+      "\necho '*       soft    nofile  1024' >> /etc/security/limits.conf"\
+      "\necho '*       hard    nofile  65535' >> /etc/security/limits.conf"\
+      "\necho 65535 > /proc/sys/fs/file-max"
 }
