@@ -58,7 +58,7 @@ haproxy_configure()
   make_install_flags=( install ${make_flags[@]} )
   make_flags+=( -j$(os cpu count) )
 
-  make "${make_flags[@]}" > build.log 2>&1 || error \
+  make ${make_flags[@]} > build.log 2>&1 || error \
       "Compilation of ${package_name} ${package_version} failed! " "$PWD/build.log"
 }
 
