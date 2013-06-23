@@ -98,6 +98,7 @@ nginx_preconfigure()
   trace_filter nginx || set -o xtrace
   typeset -ga configure_flags config_dirs nginx_dirs nginx_files
   typeset -g master_pid service_binary
+  typeset pcre zlib openssl
 
   # TODO: Allow overriding of these parameters via cli
   # These defaults may be overridden also by the nginx configuration files.
@@ -112,23 +113,14 @@ nginx_preconfigure()
   --http-fastcgi-temp-path="${install_path}/spool/fastcgi_temp"
   --http-log-path="${install_path}/log/access.log"
   --error-log-path="${install_path}/log/error.log"
+  --with-pcre
   --with-ipv6 
   --with-http_ssl_module
   --with-http_stub_status_module
   --with-http_spdy_module
+  --with-ld-opt="-L${sm_path}/pkg/active/lib "
+  --with-cc-opt="-I${sm_path}/pkg/active/include "
   )
-
-  # if package is active pcre
-  # then
-  #   pcre=$(__sm.packages.active pcre)
-  #   configure_flags+=( --with-pcre="${sm_path}/src/pcre-${pcre##*:}" )
-  #   unset pcre
-  # fi
-
-  # if package is active zlib
-  # then
-  #   configure_flags+=( --with-zlib=${sm_path}/pkg/active )
-  # fi
 
   # TODO: Add a CLI --imap flag
   # --with-imap
