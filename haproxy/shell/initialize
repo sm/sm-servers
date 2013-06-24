@@ -1,7 +1,6 @@
 #!/bin/sh
 
-typeset -g service_run_as_root_flag 
-typeset _pid pidfile configfile
+typeset -g service_run_as_root_flag  configfile pidfile _pid
 
 config read file "defaults" key "version" from haproxy prefix package
 config read file "defaults" key "archive_format" from haproxy
