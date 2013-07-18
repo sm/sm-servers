@@ -28,6 +28,8 @@ haproxy_configure()
     PREFIX="${install_path}"
     PCREDIR="${active_path}"
     SBINDIR="${install_path}/bin"
+    ADDINC=-I"${active_path}/include"
+    ADDLIB=-I"${active_path}/lib"
     USE_STATIC_PCRE=1
     )
 
