@@ -124,7 +124,6 @@ nginx_preconfigure()
   --with-cc-opt="-I${sm_path}/pkg/active/include "
   )
 
-
   # TCP Proxy Module - TODO: Add a CLI --tcp-proxy flag to toggle this.
   curl -L https://github.com/yaoweibin/nginx_tcp_proxy_module/archive/master.zip \
     -o ${src_path}/nginx_tcp_proxy_module.zip
@@ -194,25 +193,17 @@ nginx_postactivate()
     return 0
   fi
 
-  if (( ${force_flag:=0} )) &&
-    path exists "${service_config_path}"
-  then
-    path move \
-      from "${service_config_path}" \
-      to "${service_config_path}.${timestamp}"
-  fi
-
   service setup # create user, etc... then calls nginx_service_setup
 
   if ! file exists "${service_config_path}/nginx.conf"
   then
-    file link symbolic force \
-      from "${install_path}/etc/nginx" \
-      to "${service_config_path}"
-
-    path enter "${service_config_path}"
-
-    files remove "${nginx_files[@]}"
+    if path exists "${service_config_path}"
+    then
+      path move \
+        from "${service_config_path}" \
+        to "${service_config_path}.${timestamp}"
+    fi
+    cp -R ${install_path}/etc/nginx/* ${service_config_path}
   fi
 
   file link symbolic force \
@@ -265,8 +256,9 @@ nginx_service_setup()
     with "# No user line for non-root installs" \
     in "${install_path}/etc/nginx/nginx.conf"
 
-  paths chown "${service_user}" recursively \
-    "${nginx_dirs[@]}" "etc/nginx"
+  for dir in "${nginx_dirs[@]}" "etc/nginx"
+  do paths chown "${service_user}" recursively ${install_path}/${dir}
+  done
 }
 
 nginx_os_dependencies_install()
