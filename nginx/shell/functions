@@ -100,6 +100,8 @@ nginx_preconfigure()
   typeset -g master_pid service_binary
   typeset pcre zlib openssl
 
+  rm -rf ${src_path}/nginx_tcp_proxy_module*
+
   # TODO: Allow overriding of these parameters via cli
   # These defaults may be overridden also by the nginx configuration files.
   configure_flags=(
@@ -121,6 +123,15 @@ nginx_preconfigure()
   --with-ld-opt="-L${sm_path}/pkg/active/lib "
   --with-cc-opt="-I${sm_path}/pkg/active/include "
   )
+
+
+  # TCP Proxy Module - TODO: Add a CLI --tcp-proxy flag to toggle this.
+  curl -L https://github.com/yaoweibin/nginx_tcp_proxy_module/archive/master.zip \
+    -o ${src_path}/nginx_tcp_proxy_module.zip
+  unzip -q ${src_path}/nginx_tcp_proxy_module.zip -d ${src_path}/
+  mv ${src_path}/nginx_tcp_proxy_module-master ${src_path}/nginx_tcp_proxy_module
+  configure_flags+=( --add-module="${src_path}/nginx_tcp_proxy_module" )
+  patch -p1 < ${src_path}/nginx_tcp_proxy_module/tcp.patch
 
   # TODO: Add a CLI --imap flag
   # --with-imap
