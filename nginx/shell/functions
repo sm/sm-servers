@@ -203,6 +203,7 @@ nginx_postactivate()
         from "${service_config_path}" \
         to "${service_config_path}.${timestamp}"
     fi
+    mkdir -p ${service_config_path}
     cp -R ${install_path}/etc/nginx/* ${service_config_path}
   fi
 
