@@ -1,0 +1,40 @@
+#!/bin/sh
+
+etcd_prefetch() {
+	package define \
+		base_url "https://github.com/coreos/etcd/releases/download/v${package_version}" \
+    file "etcd-v${package_version}-Linux-x86_64.${archive_format}" \
+    dir "etcd-v${package_version}-Linux-x86_64" \
+		checksum_url "https://127.0.0.1/" # ... 
+}
+
+etcd_configure() {
+	true # nothing to do
+}
+
+etcd_build() {
+	true # nothing to do
+}
+
+etcd_install() {
+	trace_filter etcd || set -o xtrace
+	mkdir -p ${install_path}/bin
+	chmod 0755 ${install_path}/bin
+
+	for file in etcd etcdctl
+	do 
+		cp ./${file} ${install_path}/bin/${file}
+		chmod a+x ${install_path}/bin/${file}
+	done
+}
+
+etcd_postinstall() {
+	mkdir -p /etc/etcd/
+
+	if ! file exists /etc/etcd/etcd.conf
+	then
+		template install etcd/etcd.conf \
+			to /etc/etcd/etcd.conf \
+			mode 0644
+	fi
+}

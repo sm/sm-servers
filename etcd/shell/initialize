@@ -1,0 +1,7 @@
+#!/bin/sh
+
+typeset -x pid
+
+config read file "defaults" key "version" from etcd prefix package
+config read file "defaults" key "archive_format" from etcd
+

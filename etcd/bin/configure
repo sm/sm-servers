@@ -1,0 +1,6 @@
+#!/bin/sh
+
+ # TODO: Read variables from command line and pass to script.
+template install etcd/etcd.conf \
+	to /etc/etcd/etcd.conf \
+	mode 0644
