@@ -37,4 +37,12 @@ etcd_postinstall() {
 			to /etc/etcd/etcd.conf \
 			mode 0644
 	fi
+
+	if ! file exists /etc/init.d/etcd
+	then
+		template install etcd/init.d \
+			to /etc/init.d/etcd \
+			owner root:root \
+			mode 0755
+	fi
 }
