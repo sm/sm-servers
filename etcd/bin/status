@@ -1,5 +1,14 @@
 #!/bin/sh
 
+if command exists etcd
+then echo -e "etcd version $(etcd --version)"
+fi
+
+if command exists etcdctl
+then etcdctl -v
+fi
+echo 
+
 while read -r line 
 do 
 	case ${line} in
@@ -8,6 +17,13 @@ do
 			;;
 	esac
 done < <(ps auxww)
+echo
+
+if (( pid > 0 )) && command exists lsof
+then 
+	lsof -p ${pid}
+	echo
+fi
 
 exit 0
 

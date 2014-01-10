@@ -46,3 +46,12 @@ etcd_postinstall() {
 			mode 0755
 	fi
 }
+
+read_pidfile() {
+	if [[ -s ${pid_file} ]]
+	then pid=$(head -1 ${pid_file})
+	else pid=0
+	fi
+
+	[[ -n "${pid}" ]] && (( pid > 0 )) || pid=0
+}

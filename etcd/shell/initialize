@@ -1,6 +1,10 @@
 #!/bin/sh
 
-typeset -x pid
+typeset -x pid pid_file
+
+pid_file="/var/run/etcd.pid"
+
+read_pidfile
 
 config read file "defaults" key "version" from etcd prefix package
 config read file "defaults" key "archive_format" from etcd

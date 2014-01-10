@@ -1,12 +1,7 @@
 #!/bin/sh
 
-if [[ -s /var/run/etcd.pid ]]
-then
-	pid=$(cat /var/run/etcd.pid)
-	[[ -n "${pid}" ]] || pid="0"
-	if (( pid > 0 ))
-	then kill -TERM ${pid} || true
-	fi
+if (( pid > 0 ))
+then kill -TERM ${pid} || true
 fi
 
 etcd &> /var/log/etcd.log &
