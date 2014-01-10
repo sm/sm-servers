@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if (( pid > 0 ))
+then log fail "etcd is already running."
+fi
+
 etcd &> /var/log/etcd.log &
 echo $! > /var/run/etcd.pid
 disown
