@@ -1,5 +1,24 @@
 #!/bin/sh
 
+parse_args() {
+	local token
+	while (( $# ))
+	do
+		token=$1 ; shift
+		case "${token}" in
+			(etcd) true ;; # Ignore the first CLI parameter
+		  (client_ip) client_ip=$1 ; shift ;;
+	    (peer_ip) peer_ip=$1 ; shift ;;
+      (peer_client_port) peer_client_port=$1 ; shift ;;
+		  (peer_server_port) peer_server_port=$1 ; shift ;;
+	    (client_port) client_port=$1 ; shift ;;
+      (server_port) server_port=$1 ; shift ;;
+		  (peers) peers=$1 ; shift ;;
+	    (*) log fail "Unknown command line argument ${token}" ;;
+    esac
+  done
+}
+
 etcd_prefetch() {
 	package define \
 		base_url "https://github.com/coreos/etcd/releases/download/v${package_version}" \

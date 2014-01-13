@@ -1,3 +1,10 @@
 version=0.2.0
 archive_format=tar.gz
 base_url="https://github.com/coreos/etcd/releases/download/v"
+client_ip=127.0.0.1
+peer_ip=127.0.0.1
+peer_client_port=7001
+peer_server_port=7001
+client_port=4001
+server_port=4001
+peers=

@@ -7,7 +7,15 @@ if ! file exists /etc/etcd/etcd.conf
 then
 	template install etcd/etcd.conf \
 		to /etc/etcd/etcd.conf \
-		mode 0644
+		mode 0644 \
+		variables \
+		client_ip "${client_ip}" \
+		peer_ip "${peer_ip}" \
+		peer_client_port "${peer_client_port}" \
+		peer_server_port "${peer_server_port}" \
+		client_port "${client_port}" \
+		server_port "${server_port}" \
+		peers "${peers}" \
 fi
 
 if ! file exists /etc/init.d/etcd
