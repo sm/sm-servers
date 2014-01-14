@@ -2,18 +2,18 @@
 
 parse_args() {
 	local token
-	while (( $# ))
+	while (( ${#extension_args} ))
 	do
-		token=$1 ; shift
+    array shift extension_args into token
 		case "${token}" in
 			(etcd) true ;; # Ignore the first CLI parameter
-		  (client_ip) client_ip=$1 ; shift ;;
-	    (peer_ip) peer_ip=$1 ; shift ;;
-      (peer_client_port) peer_client_port=$1 ; shift ;;
-		  (peer_server_port) peer_server_port=$1 ; shift ;;
-	    (client_port) client_port=$1 ; shift ;;
-      (server_port) server_port=$1 ; shift ;;
-		  (peers) peers=$1 ; shift ;;
+		  (client_ip) array shift extension_args into client_ip ;;
+	    (peer_ip) array shift extension_args into peer_ip ;;
+      (peer_client_port) array shift extension_args into peer_client_port ;;
+		  (peer_server_port) array shift extension_args into peer_server_port ;;
+	    (client_port) array shift extension_args into client_port;;
+      (server_port) array shift extension_args into server_port ;;
+		  (peers) array shift extension_args into peers ;;
 	    (*) log fail "Unknown command line argument ${token}" ;;
     esac
   done
