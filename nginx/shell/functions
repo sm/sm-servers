@@ -197,8 +197,6 @@ nginx_postactivate()
 
   service setup # create user, etc... then calls nginx_service_setup
 
-  paths create ${service_config_path} ${service_log_path}
-
   if ! file exists "${service_config_path}/nginx.conf"
   then
     if path exists "${service_config_path}"
@@ -207,8 +205,11 @@ nginx_postactivate()
         from "${service_config_path}" \
         to "${service_config_path}.${timestamp}"
     fi
+    mkdir -p ${service_config_path}
     cp -R ${install_path}/etc/nginx/* ${service_config_path}
   fi
+
+  mkdir -p ${service_log_path}
 
   file link symbolic force \
     from "${install_path}/sbin/nginx" \
