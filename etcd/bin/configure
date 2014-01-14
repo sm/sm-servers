@@ -13,7 +13,7 @@ template install etcd/etcd.conf \
   peer_server_port "${peer_server_port}" \
   client_port "${client_port}" \
   server_port "${server_port}" \
-  peers $(peers_config_string)
+  peers "$(peers_config_string)"
 
 if ! file exists /etc/init.d/etcd
 then
