@@ -74,3 +74,10 @@ read_pidfile() {
 
 	[[ -n "${pid}" ]] && (( pid > 0 )) || pid=0
 }
+
+peers_config() {
+	if [[ -n "${peers}" ]]
+	then echo "\"${peers}\""
+	else return 0
+	fi
+}
