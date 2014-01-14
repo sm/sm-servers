@@ -1,0 +1,8 @@
+# Use Nginx TCP Proxy Module:
+# https://github.com/yaoweibin/nginx_tcp_proxy_module
+
+tcp {
+	include /etc/nginx/tcp/upstreams/*; 
+	include /etc/nginx/tcp/servers/*; 
+}
+

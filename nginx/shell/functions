@@ -142,7 +142,7 @@ nginx_initialize()
   typeset -ga config_dirs nginx_dirs nginx_files service_flags
   typeset -g master_pid
 
-  config_dirs=( conf servers users ssl )
+  config_dirs=( conf servers http tcp users ssl )
   nginx_dirs=( log spool run lock etc/nginx tmp )
   nginx_files=(
   fastcgi.conf fastcgi.conf.default fastcgi_params
@@ -162,6 +162,8 @@ nginx_postinstall()
 {
   trace_filter nginx || set -o xtrace
 
+  local _path
+
   if file exists "nginx.conf"
   then
     file move "${install_path}/etc/nginx.conf" \
@@ -180,7 +182,7 @@ nginx_postinstall()
     to "${install_path}/etc/nginx/conf" \
     from "${install_path}/etc/nginx"
 
-  paths create "${install_path}/config" "${install_path}/etc/nginx/servers"
+  paths create "${install_path}/config"
 }
 
 # Hook after activation of nginx package
@@ -195,6 +197,8 @@ nginx_postactivate()
 
   service setup # create user, etc... then calls nginx_service_setup
 
+  paths create ${service_config_path} ${service_log_path}
+
   if ! file exists "${service_config_path}/nginx.conf"
   then
     if path exists "${service_config_path}"
@@ -203,7 +207,6 @@ nginx_postactivate()
         from "${service_config_path}" \
         to "${service_config_path}.${timestamp}"
     fi
-    mkdir -p ${service_config_path}
     cp -R ${install_path}/etc/nginx/* ${service_config_path}
   fi
 
@@ -229,7 +232,32 @@ nginx_service_setup()
     service_pid_file "${service_pid_file}" \
     service_log_path "${service_log_path}"
 
-  paths create "${install_path}/etc/nginx/health/"
+
+  template install "nginx/nginx.http.conf" \
+    to "${install_path}/etc/nginx/http.conf" \
+    mode 0644 \
+    owner "${service_user}" \
+    with \
+    modules_path "${modules_path}" \
+    service "${service}" \
+    service_user "${service_user}" \
+    service_config_path "${service_config_path}" \
+    service_pid_file "${service_pid_file}" \
+    service_log_path "${service_log_path}"
+
+  template install "nginx/nginx.tcp.conf" \
+    to "${install_path}/etc/nginx/tcp.conf" \
+    mode 0644 \
+    owner "${service_user}" \
+    with \
+    modules_path "${modules_path}" \
+    service "${service}" \
+    service_user "${service_user}" \
+    service_config_path "${service_config_path}" \
+    service_pid_file "${service_pid_file}" \
+    service_log_path "${service_log_path}"
+
+  paths create "${install_path}/etc/nginx/health/" "${install_path}/etc/nginx/tcp/"
 
   templates install "nginx/nginx.health" \
     to "${install_path}/etc/nginx/health/nginx.conf" \
