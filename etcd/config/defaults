@@ -8,3 +8,4 @@ peer_server_port=7001
 client_port=4001
 server_port=4001
 peers=
+name=machine-0

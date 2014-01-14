@@ -14,6 +14,7 @@ parse_args() {
 	    (client_port) array shift extension_args into client_port;;
       (server_port) array shift extension_args into server_port ;;
 		  (peers) array shift extension_args into peers ;;
+		  (name) array shift extension_args into name;;
 	    (*) log fail "Unknown command line argument ${token}" ;;
     esac
   done
@@ -81,6 +82,7 @@ install_etcd_conf() {
 		peer_server_port "${peer_server_port}" \
 		client_port "${client_port}" \
 		server_port "${server_port}" \
+		name "${name}" \
 		peers "$(peers_config_string)"
 
 }
@@ -102,4 +104,5 @@ read_config_defaults() {
 	config read file "defaults" key "client_port" from etcd
 	config read file "defaults" key "server_port" from etcd
 	config read file "defaults" key "peers" from etcd
+	config read file "defaults" key "name" from etcd
 }
