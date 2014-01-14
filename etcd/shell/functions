@@ -50,20 +50,8 @@ etcd_install() {
 etcd_postinstall() {
 	mkdir -p /etc/etcd/
 
-	if ! file exists /etc/etcd/etcd.conf
-	then
-		template install etcd/etcd.conf \
-			to /etc/etcd/etcd.conf \
-			mode 0644
-	fi
-
-	if ! file exists /etc/init.d/etcd
-	then
-		template install etcd/init.d \
-			to /etc/init.d/etcd \
-			owner root:root \
-			mode 0755
-	fi
+	install_etcd_conf
+	install_initd_script
 }
 
 read_pidfile() {
@@ -80,4 +68,38 @@ peers_config_string() {
 	then echo "\"${peers}\""
 	else return 0
 	fi
+}
+
+install_etcd_conf() {
+	template install etcd/etcd.conf \
+		to /etc/etcd/etcd.conf \
+		mode 0644 \
+		variables \
+		client_ip "${client_ip}" \
+		peer_ip "${peer_ip}" \
+		peer_client_port "${peer_client_port}" \
+		peer_server_port "${peer_server_port}" \
+		client_port "${client_port}" \
+		server_port "${server_port}" \
+		peers "$(peers_config_string)"
+
+}
+
+install_initd_script() {
+	template install etcd/init.d \
+		to /etc/init.d/etcd \
+		owner root:root \
+		mode 0755
+}
+
+read_config_defaults() {
+	config read file "defaults" key "version" from etcd prefix package
+	config read file "defaults" key "archive_format" from etcd
+	config read file "defaults" key "client_ip" from etcd
+	config read file "defaults" key "peer_ip" from etcd
+	config read file "defaults" key "peer_client_port" from etcd
+	config read file "defaults" key "peer_server_port" from etcd
+	config read file "defaults" key "client_port" from etcd
+	config read file "defaults" key "server_port" from etcd
+	config read file "defaults" key "peers" from etcd
 }

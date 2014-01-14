@@ -6,15 +6,7 @@ pid_file="/var/run/etcd.pid"
 
 read_pidfile
 
-config read file "defaults" key "version" from etcd prefix package
-config read file "defaults" key "archive_format" from etcd
-config read file "defaults" key "client_ip" from etcd
-config read file "defaults" key "peer_ip" from etcd
-config read file "defaults" key "peer_client_port" from etcd
-config read file "defaults" key "peer_server_port" from etcd
-config read file "defaults" key "client_port" from etcd
-config read file "defaults" key "server_port" from etcd
-config read file "defaults" key "peers" from etcd
+read_config_defaults
 
 parse_args
 

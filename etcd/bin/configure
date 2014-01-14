@@ -3,22 +3,7 @@
 # TODO: Read variables from command line and pass to script.
 mkdir -p /etc/etcd/
 
-template install etcd/etcd.conf \
-  to /etc/etcd/etcd.conf \
-  mode 0644 \
-  variables \
-  client_ip "${client_ip}" \
-  peer_ip "${peer_ip}" \
-  peer_client_port "${peer_client_port}" \
-  peer_server_port "${peer_server_port}" \
-  client_port "${client_port}" \
-  server_port "${server_port}" \
-  peers "$(peers_config_string)"
+install_etcd_conf
 
-if ! file exists /etc/init.d/etcd
-then
-  template install etcd/init.d \
-    to /etc/init.d/etcd \
-    owner root:root \
-    mode 0755
-fi
+install_initd_script
+
