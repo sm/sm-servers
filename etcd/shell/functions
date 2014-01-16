@@ -13,6 +13,7 @@ parse_args() {
 		  (peer_server_port) array shift extension_args into peer_server_port ;;
 	    (client_port) array shift extension_args into client_port;;
       (server_port) array shift extension_args into server_port ;;
+      (data_dir) array shift extension_args into data_dir ;;
 		  (peers) array shift extension_args into peers ;;
 		  (name) array shift extension_args into name;;
 	    (*) log fail "Unknown command line argument ${token}" ;;
@@ -49,7 +50,7 @@ etcd_install() {
 }
 
 etcd_postinstall() {
-	mkdir -p /etc/etcd/
+	mkdir -p /etc/etcd/ /var/db/etcd/
 
 	install_etcd_conf
 	install_initd_script
@@ -98,6 +99,7 @@ read_config_defaults() {
 	config read file "defaults" key "version" from etcd prefix package
 	config read file "defaults" key "archive_format" from etcd
 	config read file "defaults" key "client_ip" from etcd
+	config read file "defaults" key "data_dir" from etcd
 	config read file "defaults" key "peer_ip" from etcd
 	config read file "defaults" key "peer_client_port" from etcd
 	config read file "defaults" key "peer_server_port" from etcd
