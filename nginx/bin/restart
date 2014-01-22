@@ -6,7 +6,7 @@ trace_filter nginx || set -o xtrace
 if [[ ${master_pid:-0} -gt 0 ]] 
 then
 	log "Hot upgrading Nginx ($master_pid) running binary."
-	kill -USR2 $master_pid
+	kill -HUP $master_pid
 else
 	log "It appears that Nginx is not running. Starting Nginx."
 	nginx_start
