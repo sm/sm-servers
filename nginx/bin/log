@@ -1,0 +1,13 @@
+#!/bin/sh
+
+trace_filter nginx || set -o xtrace
+
+if [[ ${master_pid:-0} -gt 0 ]]
+then
+	printf "Re-opening Nginx ($master_pid) logs."
+	kill -USR1 $master_pid
+else
+	printf "It appears that Nginx is already not running\n(from pidfile: $nginx_pid)\nStarting Nginx.\n"
+	start
+fi
+

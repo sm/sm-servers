@@ -1,0 +1,6 @@
+#!/bin/sh
+
+trace_filter nginx || set -o xtrace
+
+nginx_start
+

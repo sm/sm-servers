@@ -1,0 +1,12 @@
+#!/bin/sh
+
+trace_filter nginx || set -o xtrace
+
+if [[ ${master_pid:-0} -gt 0 ]] 
+then
+	printf "Gracefully shutting down Nginx ($master_pid) workers.\n  (workers will finish current request first)\n"
+	kill -WINCH $master_pid
+else
+	printf "It appears that Nginx is not running.\n(from pidfile: $nginx_pid)\nStarting Nginx.\n"
+fi
+

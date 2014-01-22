@@ -1,0 +1,13 @@
+#!/bin/sh
+
+trace_filter nginx || set -o xtrace
+
+if [[ ${master_pid:-0} -gt 0 ]] 
+then
+	printf "Reloading Nginx ($master_pid) configuration."
+	kill -HUP $master_pid
+else
+	printf "It appears that Nginx is not running.\n(from pidfile: $nginx_pid)\nStarting Nginx.\n"
+	nginx_start
+fi
+

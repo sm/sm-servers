@@ -2,4 +2,3 @@ list=service/list
 config=config/check
 configure/system=config/system
 server/add=server/new
-restart=service/restart

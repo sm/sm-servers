@@ -1,0 +1,10 @@
+#!/bin/sh
+
+trace_filter nginx || set -o xtrace
+
+if nginx -t -c "$nginx_conf" 
+then
+	succeed "$nginx_conf syntax is OK"
+else
+	fail "$nginx_conf syntax is NOT OK"
+fi

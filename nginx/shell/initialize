@@ -1,0 +1,38 @@
+#!/bin/sh
+
+typeset -gx master_pid 
+typeset -g nginx nginx_path nginx_conf nginx_pid nginx_log_path nginx_confd nginx_lock
+typeset -ga config_dirs nginx_dirs nginx_files service_flags domains
+typeset -g project project_user project_path force_flag edit_flag
+
+config_dirs=( conf servers http tcp users ssl )
+nginx_dirs=( log spool run etc/nginx tmp )
+nginx_files=(
+fastcgi.conf fastcgi.conf.default fastcgi_params
+fastcgi_params.default koi-utf koi-win mime.types mime.types.default
+nginx.conf.default scgi_params scgi_params.default uwsgi_params
+uwsgi_params.default win-utf
+)
+
+true ${edit_flag:=0} ${project_user:=${project}}
+
+master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
+service_flags=( -c "${service_config_path}/nginx.conf" )
+
+nginx_lock="${nginx_lock:-/var/lock/nginx}"
+nginx_confd="${nginx_confd:-"/etc/conf.d/nginx"}"
+
+if [[ -s "$nginx_confd" ]]
+then source "$nginx_confd"
+fi
+
+if command exists nginx
+then nginx="$(command -v nginx)"
+fi
+
+true \
+	"${nginx_path:=/etc/nginx}" \
+	"${nginx_conf:="$nginx_path/nginx.conf"}" \
+	"${nginx_pid:=/var/run/nginx.pid}" \
+	"${nginx_log_path:=/var/log/nginx}"
+

@@ -1,3 +1,23 @@
 #!/bin/sh
 
+typeset _version
+
+_version=$(nginx -v 2>&1| head -1 | awk -F/ '{print $2}')
+
+echo -e "Nginx:\n\tversion: ${_version}"
+
+if [[ ${master_pid:=0} -gt 0 ]] 
+then echo -e "\tstatus: running\n\tpid: ${master_pid}"
+else echo -e "\tstatus: not running."
+fi
+
+echo -e "\tpidfile: ${nginx_pid}"
+echo -e "\terror_log: $(awk '/^error_log/{print $2}' ${nginx_conf})"
+echo -e "\taccess_log: $(awk '/^access_log/{print $2}' ${nginx_conf})"
+
 ps auxww | awk 'BEGIN{getline;print $0}/[n]ginx:/'
+
+if [[ ${master_pid} -gt 0 ]]
+then exit 0
+else exit 1
+fi

@@ -3,8 +3,6 @@
 nginx_cli()
 {
   trace_filter nginx || set -o xtrace
-  typeset -g project project_user project_path force_flag edit_flag
-  typeset -ga domains
   local _ignored_args _package_args _token index _count _domain __domain
   _ignored_args=()
   _package_args=( "$@" )
@@ -69,8 +67,6 @@ nginx_cli()
         ;;
     esac
   done
-
-  nginx_initialize "${_ignored_args[@]}"
 }
 
 nginx_server_new_cli()
@@ -138,25 +134,6 @@ nginx_preconfigure()
   # --with-imap_ssl_module
 }
 
-nginx_initialize()
-{
-  typeset -ga config_dirs nginx_dirs nginx_files service_flags
-  typeset -g master_pid
-
-  config_dirs=( conf servers http tcp users ssl )
-  nginx_dirs=( log spool run lock etc/nginx tmp )
-  nginx_files=(
-  fastcgi.conf fastcgi.conf.default fastcgi_params
-  fastcgi_params.default koi-utf koi-win mime.types mime.types.default
-  nginx.conf.default scgi_params scgi_params.default uwsgi_params
-  uwsgi_params.default win-utf
-  )
-
-  true ${edit_flag:=0} ${project_user:=${project}}
-
-  master_pid="$(ps auxww | awk '/[n]ginx: master/{print $2}' | head -1)"
-  service_flags=( -c "${service_config_path}/nginx.conf" )
-}
 
 # Hook after installation of nginx package
 nginx_postinstall()
@@ -300,23 +277,18 @@ nginx_os_dependencies_install()
   if os is linux
   then
     if command exists pacman
-    then
-      pacman -S --noconfirm patch curl zlib pcre openssl make base-devel
+    then pacman -S --noconfirm patch curl zlib pcre openssl make base-devel
 
     elif command exists apt-get
-    then
-      apt-get install build-essential openssl curl zlib1g zlib1g-dev libssl-dev libpcre3-dev
+    then apt-get install build-essential openssl curl zlib1g zlib1g-dev libssl-dev libpcre3-dev
 
     elif command exists yum
-    then
-      yum install -y gcc-c++ patch zlib zlib-devel openssl openssl-devel pcre pcre-devel
+    then yum install -y gcc-c++ patch zlib zlib-devel openssl openssl-devel pcre pcre-devel
 
     elif command exists emerge
-    then
-      log "TODO: Tell wayne how to install pcre, openssl and zlib dev headers on gentoo."
+    then log "TODO: Tell wayne how to install pcre, openssl and zlib dev headers on gentoo."
 
-    else
-      log "TODO: Install zlib openssl pcre via curl, complile install."
+    else log "TODO: Install zlib openssl pcre via curl, complile install."
     fi
   elif os is darwin
   then
@@ -324,5 +296,55 @@ nginx_os_dependencies_install()
     log "Notes for ${system} $release for OSX be sure to have the latest XCode tools. "
   fi
   echo
+}
+
+
+nginx_start()
+{
+  if [[ ${master_pid:-0} -gt 0 ]] 
+  then
+    log "It appears that Nginx ($master_pid) is already running\n(from pidfile: $nginx_pid)"
+  else
+    # TODO: Pass through the --pid and --log here.
+    nginx -c "$nginx_conf"
+    result=$?
+    if [[ $result -eq 0 ]] 
+    then touch $nginx_lock
+    else fail "Could not start Nginx server using config file ${nginx_conf}"
+    fi
+  fi
+}
+
+succeed() { log "$*" ; exit 0 ; }
+
+fail() { log "ERROR: $*" ; exit 1 ; }
+
+usage() {
+  log "
+  Usage:
+
+    $0 start stop restart reload log shutdown check help [options]
+
+  Options:
+
+    --confd - Path to conf.d file, optional
+    --path  - Path to configuration files
+    --conf  - Path to nginx.conf
+    --pid   - Path to nginx pidfile
+    --log   - Path to nginx logs
+    --bin   - Path to nginx binary
+    --lock  - Path to nginx startup lock file
+
+  Description:
+
+    start    - Start Nginx
+    stop     - Stop Nginx
+    restart  - Restart Nginx
+    reload   - Reload Nginx configuration files in running nginx
+    log      - Reopen log files in running nginx
+    shutdown - Gracefully shut down workers
+    check    - Check Nginx configuration for errors
+    help     - Display this usage information
+"
 }
 
