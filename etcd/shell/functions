@@ -39,7 +39,7 @@ etcd_build() {
 
 etcd_install() {
 	trace_filter etcd || set -o xtrace
-	mkdir -p ${install_path}/bin
+	mkdir -p ${install_path}/bin ${data_dir}
 	chmod 0755 ${install_path}/bin
 
 	for file in etcd etcdctl
@@ -77,6 +77,7 @@ install_etcd_conf() {
 		to /etc/etcd/etcd.conf \
 		mode 0644 \
 		variables \
+		data_dir "${data_dir}" \
 		client_ip "${client_ip}" \
 		peer_ip "${peer_ip}" \
 		peer_client_port "${peer_client_port}" \
