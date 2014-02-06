@@ -4,7 +4,7 @@ if (( pid > 0 ))
 then kill -TERM ${pid} || true
 fi
 
-etcd &> /var/log/etcd.log &
+nohup etcd &> /var/log/etcd.log &
 echo $! > /var/run/etcd.pid
 disown
 
