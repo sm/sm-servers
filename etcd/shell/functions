@@ -79,7 +79,7 @@ install_etcd_conf() {
 		mode 0644 \
 		variables \
 		data_dir "${data_dir}" \
-		disovery "${discovery}" \
+		discovery "${discovery}" \
 		client_ip "${client_ip}" \
 		peer_ip "${peer_ip}" \
 		peer_client_port "${peer_client_port}" \
