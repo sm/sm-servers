@@ -1,4 +1,4 @@
-version=0.2.0
+version=0.3.0
 archive_format=tar.gz
 base_url="https://github.com/coreos/etcd/releases/download/v"
 data_dir=/var/db/etcd
