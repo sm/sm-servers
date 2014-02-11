@@ -10,3 +10,4 @@ client_port=4001
 server_port=4001
 peers=
 name=machine-0
+discovery=
