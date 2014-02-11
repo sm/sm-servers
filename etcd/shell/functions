@@ -8,7 +8,9 @@ parse_args() {
 		case "${token}" in
 			(etcd) true ;; # Ignore the first CLI parameter
 		  (client_ip) array shift extension_args into client_ip ;;
+		  (client_bind_ip) array shift extension_args into client_bind_ip ;;
 	    (peer_ip) array shift extension_args into peer_ip ;;
+	    (peer_bind_ip) array shift extension_args into peer_bind_ip ;;
       (peer_client_port) array shift extension_args into peer_client_port ;;
 		  (peer_server_port) array shift extension_args into peer_server_port ;;
 	    (client_port) array shift extension_args into client_port;;
@@ -81,7 +83,9 @@ install_etcd_conf() {
 		data_dir "${data_dir}" \
 		discovery "${discovery}" \
 		client_ip "${client_ip}" \
+		client_bind_ip "${client_bind_ip}" \
 		peer_ip "${peer_ip}" \
+		peer_bind_ip "${peer_bind_ip}" \
 		peer_client_port "${peer_client_port}" \
 		peer_server_port "${peer_server_port}" \
 		client_port "${client_port}" \
@@ -102,9 +106,11 @@ read_config_defaults() {
 	config read file "defaults" key "version" from etcd prefix package
 	config read file "defaults" key "archive_format" from etcd
 	config read file "defaults" key "client_ip" from etcd
+	config read file "defaults" key "client_bind_ip" from etcd
 	config read file "defaults" key "data_dir" from etcd
 	config read file "defaults" key "discovery" from etcd
 	config read file "defaults" key "peer_ip" from etcd
+	config read file "defaults" key "peer_bind_ip" from etcd
 	config read file "defaults" key "peer_client_port" from etcd
 	config read file "defaults" key "peer_server_port" from etcd
 	config read file "defaults" key "client_port" from etcd
