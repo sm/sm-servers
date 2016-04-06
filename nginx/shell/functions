@@ -115,6 +115,7 @@ nginx_preconfigure()
   --with-http_stub_status_module
   --with-ld-opt="-L${sm_path}/pkg/active/lib "
   --with-cc-opt="-I${sm_path}/pkg/active/include "
+  --with-stream
   )
 
   # TODO: Add a CLI --imap flag
